@@ -62,7 +62,6 @@ elmo-hikes/
 
 - **Adam** - BCIT CST Student, Likes going on hikes.
 - **Jiahao(Samon) Zhu** - BCIT CST Student with a passion for user-friendly and cool applications. Fun fact: Loves watching movies
-- **Jiahao(Samon) Zhu**
 ---
 
 
