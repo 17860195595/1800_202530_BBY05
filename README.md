@@ -59,8 +59,8 @@ elmo-hikes/
 
 
 ## Contributors
+- **Adam** - BCIT CST Student, Likes going on hikes.
 - **Jiahao(Samon) Zhu** - BCIT CST Student with a passion for user-friendly and cool applications. Fun fact: Loves watching movies
-- **Teammate Name** - BCIT CST Student, Frontend enthusiast with a knack for creative design. Fun fact: Has a collection of over 50 houseplants.
 
 ---
 
