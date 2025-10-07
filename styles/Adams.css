@@ -12,16 +12,13 @@ body {
   width: 100%;
   height: 500px;
   object-fit: cover;
-
 }
 
 .container {
   position: absolute;
-  top: 50%;
-  transform: translateY(50%);
+  top: 15%;
   width: 100%;
   height: 500px;
-  position: relative;
 }
 
 .container a {
@@ -31,6 +28,7 @@ body {
   transform: translate(-50%, -50%); /* keep it centred */
   background: transparent;
   text-decoration: solid;
+  color: rgb(255, 0, 0);
   padding: 12px;
-  font-size: 26px;
+  font-size: 50px;
 }
