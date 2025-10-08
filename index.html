@@ -10,6 +10,13 @@
 
     <!-- Other libraries go here -->
 
+    <!-- Bootstrap CSS (CDN) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoA6V7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
     <!-- Link to styles of your own -->
     <link rel="stylesheet" href="./styles/style.css" />
     <link rel="stylesheet" href="./styles/index.css" />
@@ -20,20 +27,7 @@
     <!-- Your HTML Layout go here -->
     <!------------------------------>
     <!-- Stuff for body goes here -->
-    <!-- <nav class="navbar bg-body-tertiary  py-3">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          <img
-            src="./images/ClearWay_logo.png"
-            alt="ClearWay Logo"
-            width="40"
-            height="40"
-            class="d-inline-block align-text-top"
-          />
-          ClearWay
-        </a>
-      </div>
-    </nav> -->
+    <!-- nav bar -->
     <div class="nav">
       <div class="leftBox">
         <div class="imgBox">
@@ -42,23 +36,23 @@
         <div class="text">ClearWay</div>
       </div>
       <div class="rightBox">
-        <!--  侧边栏：可以展开 -->
-        <!-- <div class="menuItem">Home</div>
-        <div class="menuItem">About</div>
-        <div class="menuItem">Services</div>
-        <div class="menuItem">Contact</div> 
-      </div> -->
-      <div class="btn">
-        <img src="./images/menuBtn.png" alt="">
+        <div class="btn">
+          <img src="./images/menuBtn.png" alt="" />
+        </div>
+        <div class="menuBox">
+          <div class="menuItem">Home</div>
+          <div class="menuItem">About</div>
+          <div class="menuItem">Services</div>
+          <div class="menuItem">Contact</div>
+        </div>
       </div>
-      <div class="menuBox">
-        <div class="menuItem">Home</div>
-        <div class="menuItem">About</div>
-        <div class="menuItem">Services</div>
-        <div class="menuItem">Contact</div> 
-      </div>
-      
     </div>
+
+    <!-- logIn button -->
+    <div class="logInBox d-flex justify-content-center">
+      <button type="button" class="btn btn-primary btn-lg">Log In</button>
+    </div>
+
     <!---------------------------------------------->
     <!-- Your own JavaScript functions go here    -->
     <!---------------------------------------------->
