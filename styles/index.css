@@ -84,3 +84,23 @@ html .nav .fade {
 html .logInBox {
   margin-top: 15px;
 }/*# sourceMappingURL=index.css.map */
+
+
+.foot {
+  position: fixed;
+  bottom: 0%;
+  width: 100%;
+  background-color: rgb(143, 154, 187);
+  overflow: hidden;
+}
+
+.foot-grid {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  justify-content: space-evenly;
+}
+.foot-image {
+  flex-wrap: wrap;
+  height: auto;
+}
