@@ -80,7 +80,11 @@ html .nav .fade {
   opacity: 1;
   pointer-events: auto;
   transition: opacity 0.5s;
-} /*# sourceMappingURL=index.css.map */
+}
+html .logInBox {
+  margin-top: 15px;
+}/*# sourceMappingURL=index.css.map */
+
 
 .foot {
   position: fixed;
