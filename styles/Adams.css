@@ -15,10 +15,11 @@ body {
 }
 
 .container {
-  position: absolute;
-  top: 15%;
+  margin-top: 20px;
   width: 100%;
-  height: 500px;
+  height: 500px; 
+  position: relative;
+
 }
 
 .container a {
@@ -27,8 +28,10 @@ body {
   top: 50%;
   transform: translate(-50%, -50%); /* keep it centred */
   background: transparent;
-  text-decoration: solid;
-  color: rgb(255, 0, 0);
   padding: 12px;
   font-size: 50px;
+  display: block;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  padding: 1rem;
 }
