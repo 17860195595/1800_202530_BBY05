@@ -11,16 +11,19 @@
     <!-- Other libraries go here -->
 
     <!-- Bootstrap CSS (CDN) -->
-    <link
+    <!-- <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-ENjdO4Dr2bkBIFxQpeoA6V7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
       crossorigin="anonymous"
-    />
+    /> -->
     <!-- Link to styles of your own -->
     <link rel="stylesheet" href="styles/Adams.css" />
-    <link rel="stylesheet" href="./styles/style.css" />
-    <link rel="stylesheet" href="./styles/index.css" />
+    <link rel="stylesheet" href="styles/index.css" />
+    <link rel="stylesheet" href="styles/reset.css" />
+    <!-- components -->
+    <script type="module" src="./components/js/appFooter.js"></script>
+    <script type="module" src="./components/js/appNavbar.js"></script>
   </head>
 
   <body>
@@ -29,42 +32,21 @@
     <!------------------------------>
     <!-- Stuff for body goes here -->
     <!-- nav bar -->
-    <div class="nav">
-      <div class="leftBox">
-        <div class="imgBox">
-          <img src="./images/ClearWay_logo.png" alt="" />
-        </div>
-        <div class="text">ClearWay</div>
-      </div>
-      <div class="rightBox">
-        <div class="btn">
-          <img src="./images/menuBtn.png" alt="" />
-        </div>
-        <div class="menuBox">
-          <div class="menuItem">Home</div>
-          <div class="menuItem">About</div>
-          <div class="menuItem">Services</div>
-          <div class="menuItem">Contact</div>
-        </div>
-      </div>
-    </div>
+    <app-navbar></app-navbar>
     <!-- banner -->
     <div class="container">
       <a>Find the ClearWay</a>
       <img class="my_banner" src="images/traffic.jpg" />
     </div>
-     <!-- logIn button -->
-    <div class="logInBox d-flex justify-content-center">
-      <button type="button" class="btn btn-primary btn-lg">Log In</button>
+    <!-- logIn button -->
+    <div
+      class="logInBox d-flex justify-content-center"
+      style="margin-top: 10px"
+    >
+      <button type="button" class="btn btn-primary btn-lg logIn">Log In</button>
     </div>
     <!-- footer -->
-    <footer class="foot">
-      <div class="foot-grid">
-        <div class="foot-image"><img src="images/map.png" /></div>
-        <div class="foot-image"><img src="images/traffic.png" /></div>
-        <div class="foot-image"><img src="images/settings.png" /></div>
-      </div>
-    </footer>
+    <app-footer></app-footer>
     <!---------------------------------------------->
     <!-- Your own JavaScript functions go here    -->
     <!---------------------------------------------->
