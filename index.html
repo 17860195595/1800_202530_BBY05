@@ -24,6 +24,7 @@
     <!-- components -->
     <script type="module" src="./components/js/appFooter.js"></script>
     <script type="module" src="./components/js/appNavbar.js"></script>
+    <script type="module" src="./src/app.js"></script>
   </head>
 
   <body>
@@ -52,6 +53,11 @@
     <!---------------------------------------------->
 
     <!-- Link to scripts of your own -->
-    <script type="module" src="./src/main.js"></script>
+    <script>
+      function logInJump() {
+        window.location.href = "pages/login.html";
+      }
+      document.querySelector(".logIn").addEventListener("click", logInJump);
+    </script>
   </body>
 </html>
