@@ -1,5 +1,4 @@
 {
-  "name": "web_template",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -11,6 +10,7 @@
     "vite": "^7.0.0"
   },
   "dependencies": {
-    "bootstrap": "^5.3.8"
+    "bootstrap": "^5.3.8",
+    "firebase": "^12.4.0"
   }
 }
