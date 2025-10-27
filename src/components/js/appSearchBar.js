@@ -101,6 +101,6 @@ class AppSearchBar extends HTMLElement {
   }
 }
 
-// Register component
-customElements.define("app-search-bar", AppSearchBar);
+// Export component for registration
+export { AppSearchBar };
 

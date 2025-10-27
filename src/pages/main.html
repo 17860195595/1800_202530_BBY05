@@ -19,9 +19,7 @@
       crossorigin=""
     ></script>
     <!-- Then load our modules -->
-    <script type="module" src="../components/js/appFooter.js"></script>
-    <script type="module" src="../components/js/appNavbar.js"></script>
-    <script type="module" src="../components/js/appSearchBar.js"></script>
+    <script type="module" src="../components/components.js"></script>
     <script type="module" src="../js/main.js"></script>
   </head>
   <body>
@@ -41,23 +39,45 @@
     <script type="module">
       import { auth } from "../js/firebaseConfig.js";
       import { onAuthStateChanged } from "firebase/auth";
-      // welcome message logic
+      
+      // Welcome message logic
       const welcomeTitle = document.getElementById("welcomeTitle");
       const welcomeBox = document.getElementById("welcomeBox");
       const welcomeMsg = document.getElementById("welcomeMsg");
       const closeBtn = document.getElementById("closeWelcomeBox");
-      closeBtn.onclick = function () {
+      
+      // Close button click handler
+      if (closeBtn) {
+        closeBtn.addEventListener("click", function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          welcomeBox.classList.add("d-none");
+          welcomeBox.style.display = "none";
+        });
+      }
+      
+      // Helper function to show message box
+      function showMessageBox() {
+        welcomeBox.classList.remove("d-none");
+        welcomeBox.style.display = "flex";
+      }
+      
+      // Helper function to hide message box
+      function hideMessageBox() {
         welcomeBox.classList.add("d-none");
-      };
+        welcomeBox.style.display = "none";
+      }
+      
+      // Handle authentication state
       onAuthStateChanged(auth, (user) => {
         if (user) {
           const name = user.displayName || user.email || "User";
           welcomeTitle.textContent = `Welcome, ${name}!`;
           welcomeMsg.textContent = "You are successfully logged in.";
-          welcomeBox.classList.remove("d-none");
+          showMessageBox();
         } else {
           welcomeTitle.textContent = "";
-          welcomeBox.classList.add("d-none");
+          hideMessageBox();
         }
       });
     </script>
