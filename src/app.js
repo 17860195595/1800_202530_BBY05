@@ -1,11 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
-// Listen for authentication state and show username on home.html
+// Listen for authentication state and show username on main.html
 import { onAuthReady } from "../js/authentication.js";
 
 function initApp() {
-  // Only run username logic on home.html
-  if (window.location.pathname.endsWith("home.html")) {
+  // Only run username logic on main.html
+  if (window.location.pathname.endsWith("main.html")) {
     const usernameEl = document.getElementById("username");
     const mainPageAlert = document.getElementById("mainPageLoggedAlert");
     onAuthReady((user) => {
