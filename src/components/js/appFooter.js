@@ -1,22 +1,6 @@
-// Helper functions to get paths
-function getComponentsPath(relativePath) {
-  const pathname = window.location.pathname;
-  
-  if (pathname.includes('/pages/')) {
-    return '../components/' + relativePath;
-  }
-  
-  return './src/components/' + relativePath;
-}
-
+// Use absolute paths from root
 function getPagesPath(filename) {
-  const pathname = window.location.pathname;
-  
-  if (pathname.includes('/pages/')) {
-    return './' + filename;  // Same directory as pages
-  }
-  
-  return './src/pages/' + filename;
+  return `/src/pages/${filename}`;
 }
 
 class AppFooter extends HTMLElement {
@@ -28,7 +12,9 @@ class AppFooter extends HTMLElement {
     // Create link tag to load external CSS
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
-    styleLink.setAttribute("href", getComponentsPath('styles/footer.css'));
+    
+    // Use absolute path from root
+    styleLink.setAttribute("href", "/src/components/styles/footer.css");
 
     // Define HTML template with icons
     const wrapper = document.createElement("div");

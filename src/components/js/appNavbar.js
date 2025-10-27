@@ -4,23 +4,11 @@ class AppNavbar extends HTMLElement {
   }
   
   getImagePath(filename) {
-    const currentPath = window.location.pathname;
-    
-    if (currentPath.includes("/pages/")) {
-      return `../assets/images/${filename}`;
-    }
-    
-    return `./src/assets/images/${filename}`;
+    return `/src/assets/images/${filename}`;
   }
   
   getComponentsPath(relativePath) {
-    const pathname = window.location.pathname;
-    
-    if (pathname.includes('/pages/')) {
-      return '../components/' + relativePath;
-    }
-    
-    return './src/components/' + relativePath;
+    return `/src/components/${relativePath}`;
   }
 
   connectedCallback() {
