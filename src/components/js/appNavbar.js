@@ -1,40 +1,76 @@
 class AppNavbar extends HTMLElement {
   constructor() {
     super();
+  }
+  
+  getImagePath(filename) {
+    const currentPath = window.location.pathname;
+    
+    if (currentPath.includes("/pages/")) {
+      return `../assets/images/${filename}`;
+    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
+      return `./src/assets/images/${filename}`;
+    }
+    
+    return `/src/assets/images/${filename}`;
+  }
 
-    // Create shadow DOM to isolate internal styles
-    const shadow = this.attachShadow({ mode: "open" });
-    // Create link tag to load external CSS
-    const styleLink = document.createElement("link");
-    styleLink.setAttribute("rel", "stylesheet");
-    styleLink.setAttribute("href", "/src/components/styles/navbar.css");
+  connectedCallback() {
+    // Check if shadow root already exists
+    if (!this.shadowRoot) {
+      // Create shadow DOM to isolate internal styles
+      this.attachShadow({ mode: "open" });
+      
+      // Create link tag to load external CSS
+      const styleLink = document.createElement("link");
+      styleLink.setAttribute("rel", "stylesheet");
+      
+      // Use dynamic path based on current location
+      const currentPath = window.location.pathname;
+      let cssPath = "/src/components/styles/navbar.css";
+      
+      if (currentPath.includes("/pages/")) {
+        cssPath = "../components/styles/navbar.css";
+      } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
+        cssPath = "./src/components/styles/navbar.css";
+      }
+      
+      styleLink.setAttribute("href", cssPath);
 
-    // Define HTML template
-    const wrapper = document.createElement("div");
-    wrapper.innerHTML = `
-        <div class="nav">
-      <div class="leftBox">
-        <div class="imgBox">
-          <img src="/src/assets/images/ClearWay_logo.png" alt="" />
+      // Get image paths
+      const logoPath = this.getImagePath('ClearWay_logo.png');
+      const menuBtnPath = this.getImagePath('menuBtn.png');
+      
+      // Define HTML template
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+          <div class="nav">
+        <div class="leftBox">
+          <div class="imgBox">
+            <img src="${logoPath}" alt="" />
+          </div>
+          <div class="text">ClearWay</div>
         </div>
-        <div class="text">ClearWay</div>
+        <div class="rightBox">
+          <div class="btn">
+            <img src="${menuBtnPath}" alt="" />
+          </div>
+          <div class="menuBox">
+            <div class="menuItem" id="homeBtn">Home</div>
+            <div class="menuItem" id="aboutBtn">About</div>
+            <div class="menuItem" id="servicesBtn">Services</div>
+            <div class="menuItem" id="authBtn"></div>
+          </div>
+        </div>
       </div>
-      <div class="rightBox">
-        <div class="btn">
-          <img src="/src/assets/images/menuBtn.png" alt="" />
-        </div>
-        <div class="menuBox">
-          <div class="menuItem" id="homeBtn">Home</div>
-          <div class="menuItem" id="aboutBtn">About</div>
-          <div class="menuItem" id="servicesBtn">Services</div>
-          <div class="menuItem" id="authBtn"></div>
-        </div>
-      </div>
-    </div>
-    `;
-    // Add styles and content
-    shadow.appendChild(styleLink);
-    shadow.appendChild(wrapper);
+      `;
+      
+      // Add styles and content
+      this.shadowRoot.appendChild(styleLink);
+      this.shadowRoot.appendChild(wrapper);
+    }
+    
+    // Initialize components
     this.checkAuthState();
     this.initMenuBtn();
     this.initMenuItems();
