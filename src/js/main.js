@@ -149,23 +149,41 @@ function handleSearch(query) {
     });
 }
 
-// Initialize map when page loads
-document.addEventListener("DOMContentLoaded", function() {
-  // Wait a bit for Leaflet to be fully loaded if needed
-  if (typeof L !== 'undefined') {
-    initMap();
-  } else {
-    setTimeout(initMap, 100);
-  }
-
-  // Listen for search events from search component
-  setTimeout(() => {
-    const searchBar = document.querySelector("app-search-bar");
-    if (searchBar) {
-      searchBar.addEventListener("search", (e) => {
-        const query = e.detail.query;
-        handleSearch(query);
-      });
+    // Report button functionality
+    function initReportBtn() {
+      const reportBtn = document.getElementById("reportBtn");
+      
+      // Handle button click - redirect to report type selection page
+      if (reportBtn) {
+        reportBtn.addEventListener("click", function() {
+          // Redirect to report type selection page
+          window.location.href = "./report.html";
+        });
+      }
     }
-  }, 500);
-});
+
+    // Initialize map when page loads
+    document.addEventListener("DOMContentLoaded", function() {
+      // Wait a bit for Leaflet to be fully loaded if needed
+      if (typeof L !== 'undefined') {
+        initMap();
+      } else {
+        setTimeout(initMap, 100);
+      }
+
+      // Initialize report button functionality
+      setTimeout(() => {
+        initReportBtn();
+      }, 500);
+
+      // Listen for search events from search component
+      setTimeout(() => {
+        const searchBar = document.querySelector("app-search-bar");
+        if (searchBar) {
+          searchBar.addEventListener("search", (e) => {
+            const query = e.detail.query;
+            handleSearch(query);
+          });
+        }
+      }, 500);
+    });

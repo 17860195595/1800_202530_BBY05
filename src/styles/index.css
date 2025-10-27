@@ -1,0 +1,169 @@
+/* Hero section */
+.hero-section {
+  width: 100%;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* Container for banner and content */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #333;
+  text-align: center;
+  letter-spacing: -0.03em;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  line-height: 1.2;
+}
+
+.hero-image-wrapper {
+  width: 100%;
+  max-width: 900px;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.my_banner {
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  object-fit: cover;
+  display: block;
+}
+
+.my_banner:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Login button container */
+.logInBox {
+  max-width: 1200px;
+  margin: 1.5rem auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logIn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.logIn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.logIn:active {
+  transform: translateY(-1px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 60vh;
+    padding: 2rem 0;
+  }
+
+  .container {
+    margin: 0 auto;
+    padding: 0 1rem;
+    gap: 1.5rem;
+  }
+
+  .hero-title {
+    font-size: 2.25rem;
+    line-height: 1.15;
+  }
+
+  .hero-image-wrapper {
+    border-radius: 0.75rem;
+  }
+
+  .my_banner {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .logInBox {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .logIn {
+    padding: 0.875rem 2rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    min-height: 50vh;
+    padding: 1.5rem 0;
+  }
+
+  .container {
+    margin: 0 auto;
+    padding: 0 0.75rem;
+    gap: 1rem;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-image-wrapper {
+    border-radius: 0.5rem;
+  }
+
+  .my_banner {
+    border-radius: 0.5rem;
+  }
+
+  .logInBox {
+    margin: 0.75rem auto;
+    padding: 0 0.75rem;
+  }
+
+  .logIn {
+    padding: 0.75rem 1.75rem;
+    font-size: 1rem;
+  }
+}
+

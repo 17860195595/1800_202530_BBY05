@@ -1,0 +1,253 @@
+/* favoriteList.css */
+.favorite-list-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  min-height: calc(100vh - 180px);
+}
+
+.favorite-list-header {
+  margin-bottom: 1.5rem;
+}
+
+.favorite-list-header h2 {
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: 600;
+  margin: 0;
+}
+
+.favorite-routes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.favorite-route-item {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.favorite-route-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.favorite-route-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  border-color: #d0d0d0;
+}
+
+.route-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.route-from {
+  font-size: 0.875rem;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.route-to {
+  font-size: 1.125rem;
+  color: #333;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.route-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.heart-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.heart-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: white;
+}
+
+.route-stats {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  padding: 0.375rem 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.detail-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 0.875rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  color: white;
+  white-space: nowrap;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.detail-button:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+.detail-button:active {
+  transform: translateY(0);
+}
+
+.detail-button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke: white;
+}
+
+.empty-favorites {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  min-height: 60vh;
+}
+
+.empty-favorites svg {
+  color: #667eea;
+  margin-bottom: 1.5rem;
+  display: block;
+  opacity: 0.5;
+}
+
+.empty-favorites h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.empty-favorites p {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .favorite-list-container {
+    padding: 1rem;
+  }
+  
+  .favorite-list-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .favorite-route-item {
+    padding: 1.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  
+  .route-details {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .detail-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .favorite-list-container {
+    padding: 1rem;
+  }
+  
+  .favorite-list-header h2 {
+    font-size: 1.125rem;
+  }
+  
+  .favorite-route-item {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .route-from {
+    font-size: 0.75rem;
+  }
+  
+  .route-to {
+    font-size: 1rem;
+  }
+  
+  .heart-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .heart-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .route-stats {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.625rem;
+  }
+  
+  .detail-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .detail-button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
