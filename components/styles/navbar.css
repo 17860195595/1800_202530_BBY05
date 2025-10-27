@@ -68,7 +68,7 @@
   border: 0.1rem solid rgb(200, 200, 200);
   border-radius: 0.5rem;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  z-index: 100;
+  z-index: 99;
   transition: opacity 0.5s;
   opacity: 0;
   pointer-events: none;

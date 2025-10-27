@@ -76,7 +76,7 @@ export async function logoutUser() {
 // Observes changes in the user's authentication state (login/logout)
 // and updates the UI or redirects accordingly.
 //
-// If the user is on "home.html":
+// If the user is on "main.html":
 //   - If logged in → displays "Hello, [Name]!"
 //   - If not logged in → redirects to "index.html"
 //
@@ -87,7 +87,7 @@ export async function logoutUser() {
 // -------------------------------------------------------------
 export function checkAuthState() {
   onAuthStateChanged(auth, (user) => {
-    if (window.location.pathname.endsWith("home.html")) {
+    if (window.location.pathname.endsWith("main.html")) {
       if (user) {
         const displayName = user.displayName || user.email;
         $("#welcomeMessage").text(`Hello, ${displayName}!`);
