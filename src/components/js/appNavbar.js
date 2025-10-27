@@ -1,13 +1,38 @@
-class AppNavbar extends HTMLElement {
+// Import images to ensure they are bundled
+import logoImg from '../../assets/images/ClearWay_logo.png';
+import menuBtnImg from '../../assets/images/menuBtn.png';
+
+export class AppNavbar extends HTMLElement {
   constructor() {
     super();
   }
   
   getImagePath(filename) {
+    // Return imported image URLs directly
+    if (filename === 'ClearWay_logo.png') {
+      return logoImg;
+    }
+    if (filename === 'menuBtn.png') {
+      return menuBtnImg;
+    }
+    // Fallback for other images
+    const hasAssetsScript = document.querySelector('script[src*="assets/"]') || 
+                           document.querySelector('link[href*="assets/"]');
+    if (hasAssetsScript) {
+      return `/assets/${filename}`;
+    }
     return `/src/assets/images/${filename}`;
   }
   
   getComponentsPath(relativePath) {
+    // Check if we're in production build by looking for assets scripts
+    const hasAssetsScript = document.querySelector('script[src*="assets/"]') || 
+                           document.querySelector('link[href*="assets/"]');
+    if (hasAssetsScript) {
+      // Find the correct CSS file dynamically
+      const cssLink = document.querySelector('link[href*="assets/"][href$=".css"]');
+      return cssLink ? cssLink.href : '/assets/components-_ANuRjC4.css';
+    }
     return `/src/components/${relativePath}`;
   }
 
@@ -193,5 +218,4 @@ class AppNavbar extends HTMLElement {
   }
 }
 
-// Export component for registration
-export { AppNavbar };
+// Component is already exported in class declaration

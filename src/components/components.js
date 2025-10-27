@@ -1,6 +1,15 @@
 // Component registration file
 // Central location to import and register all components
 
+// Import global reset styles
+import '../styles/reset.css';
+
+// Import component styles
+import './styles/navbar.css';
+import './styles/footer.css';
+import './styles/searchbar.css';
+import './styles/pageHeader.css';
+
 // Import and register AppNavbar
 import { AppNavbar } from './js/appNavbar.js';
 customElements.define("app-navbar", AppNavbar);
