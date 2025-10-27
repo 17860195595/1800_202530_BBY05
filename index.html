@@ -33,18 +33,19 @@
     <!-- Stuff for body goes here -->
     <!-- nav bar -->
     <app-navbar></app-navbar>
-    <!-- banner -->
-    <div class="container">
-      <a>Find the ClearWay</a>
-      <img class="my_banner" src="./src/assets/images/traffic.jpg" />
-    </div>
-    <!-- logIn button -->
-    <div
-      class="logInBox d-flex justify-content-center"
-      style="margin-top: 10px"
-    >
-      <button type="button" class="btn btn-primary btn-lg logIn">Log In</button>
-    </div>
+    <!-- hero section -->
+    <main class="hero-section">
+      <div class="container">
+        <h1 class="hero-title">Find the ClearWay</h1>
+        <div class="hero-image-wrapper">
+          <img class="my_banner" src="./src/assets/images/traffic.jpg" alt="ClearWay Traffic Navigation" />
+        </div>
+      </div>
+      <!-- CTA section -->
+      <div class="logInBox">
+        <button type="button" class="logIn">Log In</button>
+      </div>
+    </main>
     <!-- footer -->
     <app-footer></app-footer>
     <!---------------------------------------------->

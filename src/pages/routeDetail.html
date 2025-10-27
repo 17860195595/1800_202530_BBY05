@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Route Detail - ClearWay</title>
+    <link rel="stylesheet" href="../styles/reset.css" />
+    <link rel="stylesheet" href="../styles/routeDetail.css" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="../components/components.js"></script>
+    <script type="module" src="../js/routeDetail.js"></script>
+  </head>
+  <body>
+    <app-page-header title="The Route Detail"></app-page-header>
+    
+    <div class="route-detail-container">
+      <!-- Location Input Section -->
+      <div class="location-input-section">
+        <button class="location-btn" id="getLocation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 7l-5-5M21 7l-5 5M21 7H11M3 12l5 5M3 12l5-5M3 12h10"></path>
+          </svg>
+        </button>
+        <div class="location-text">
+          <div class="location-label">Your location</div>
+          <input type="text" id="userLocation" placeholder="British Columbia Institute of Techn..." readonly>
+        </div>
+      </div>
+
+      <!-- Map Section -->
+      <div id="mapContainer" class="map-container">
+        <div id="map" class="map"></div>
+      </div>
+
+      <!-- Route Summary -->
+      <div class="route-summary">
+        <div class="route-info">
+          <span class="distance" id="routeDistance">14km</span>
+          <span class="separator">•</span>
+          <span class="duration" id="routeDuration">17mins</span>
+        </div>
+      </div>
+
+      <!-- Details Section -->
+      <div class="details-section">
+        <h3>Details</h3>
+        <div class="details-content">
+          <div class="detail-item">
+            <span class="detail-label">Route Type:</span>
+            <span class="detail-value" id="routeType">Fastest Route</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Traffic:</span>
+            <span class="detail-value" id="trafficStatus">Light Traffic</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="action-btn save-btn" id="saveRoute">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span>Save</span>
+        </button>
+        <button class="action-btn share-btn" id="shareRoute">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          <span>Share</span>
+        </button>
+      </div>
+    </div>
+    
+    <app-footer></app-footer>
+  </body>
+</html>

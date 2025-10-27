@@ -13,5 +13,9 @@ customElements.define("app-footer", AppFooter);
 import { AppSearchBar } from './js/appSearchBar.js';
 customElements.define("app-search-bar", AppSearchBar);
 
+// Import and register AppPageHeader
+import { AppPageHeader } from './js/appPageHeader.js';
+customElements.define("app-page-header", AppPageHeader);
+
 // Export for potential future use
-export { AppNavbar, AppFooter, AppSearchBar };
+export { AppNavbar, AppFooter, AppSearchBar, AppPageHeader };

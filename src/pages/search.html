@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search - ClearWay</title>
+    <link rel="stylesheet" href="../styles/reset.css" />
+    <link rel="stylesheet" href="../styles/search.css" />
+    <script type="module" src="../components/components.js"></script>
+    <script type="module" src="../js/search.js"></script>
+  </head>
+  <body>
+    <app-page-header title="Search Location"></app-page-header>
+    
+    <div class="search-page-container">
+      <p class="search-page-subtitle">Find your destination or check traffic conditions</p>
+      
+      <app-search-bar standalone></app-search-bar>
+      
+      <div id="searchResults" class="search-results-list-container">
+        <div class="empty-state">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <h3>Search for a location</h3>
+          <p>Enter keywords to find your destination</p>
+        </div>
+      </div>
+    </div>
+    
+    <app-footer></app-footer>
+  </body>
+</html>
+
