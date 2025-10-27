@@ -52,5 +52,5 @@ class AppNavbar extends HTMLElement {
   }
 }
 
-// Register component
-customElements.define("app-navbar", AppNavbar);
+// Export component for registration
+export { AppNavbar };

@@ -26,5 +26,5 @@ class AppFooter extends HTMLElement {
   }
 }
 
-// Register component
-customElements.define("app-footer", AppFooter);
+// Export component for registration
+export { AppFooter };
