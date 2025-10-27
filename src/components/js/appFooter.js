@@ -7,7 +7,18 @@ class AppFooter extends HTMLElement {
     // Create link tag to load external CSS
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
-    styleLink.setAttribute("href", "/src/components/styles/footer.css");
+    
+    // Use dynamic path based on current location
+    const currentPath = window.location.pathname;
+    let cssPath = "/src/components/styles/footer.css";
+    
+    if (currentPath.includes("/pages/")) {
+      cssPath = "../components/styles/footer.css";
+    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
+      cssPath = "./src/components/styles/footer.css";
+    }
+    
+    styleLink.setAttribute("href", cssPath);
 
     // Define HTML template with icons
     const wrapper = document.createElement("div");
@@ -107,16 +118,24 @@ class AppFooter extends HTMLElement {
       }
     });
     
+    // Get current path and determine correct route
+    const currentPath = window.location.pathname;
+    let basePath = "/src/pages/";
+    
+    if (currentPath.includes("/pages/")) {
+      basePath = "./";
+    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
+      basePath = "./src/pages/";
+    }
+    
     // Direct navigation based on route
     if (route === 'favorites') {
-      window.location.href = '/src/pages/favorateList.html';
+      window.location.href = basePath + 'favorateList.html';
     } else if (route === 'search') {
-      window.location.href = '/src/pages/main.html';
+      window.location.href = basePath + 'main.html';
     } else if (route === 'traffic') {
-      // Navigate to traffic page (if exists)
-      window.location.href = '/src/pages/main.html';
+      window.location.href = basePath + 'main.html';
     } else if (route === 'settings') {
-      // Navigate to settings page (if exists)
       console.log('Settings page not implemented yet');
     }
   }
