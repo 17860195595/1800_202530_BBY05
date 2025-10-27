@@ -12,12 +12,7 @@ class AppPageHeader extends HTMLElement {
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
     
-    const pathname = window.location.pathname;
-    const cssPath = pathname.includes('/pages/') 
-      ? "../components/styles/pageHeader.css" 
-      : "./src/components/styles/pageHeader.css";
-    
-    styleLink.setAttribute("href", cssPath);
+    styleLink.setAttribute("href", "/src/components/styles/pageHeader.css");
 
     // Create HTML
     const wrapper = document.createElement("div");

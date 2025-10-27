@@ -9,12 +9,7 @@ class AppSearchBar extends HTMLElement {
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
     
-    const pathname = window.location.pathname;
-    const cssPath = pathname.includes('/pages/') 
-      ? "../components/styles/searchbar.css" 
-      : "./src/components/styles/searchbar.css";
-    
-    styleLink.setAttribute("href", cssPath);
+    styleLink.setAttribute("href", "/src/components/styles/searchbar.css");
 
     // Check if this is a standalone search page (has 'standalone' attribute)
     const isStandalone = this.hasAttribute('standalone');
