@@ -44,15 +44,29 @@ Example:
 
 ```
 elmo-hikes/
-├── src/
-│   ├── main.js
-├── styles/
-│   └── style.css
-├── public/
-├── images/
 ├── index.html
 ├── package.json
 ├── README.md
+└── src/
+    ├── assets/
+    │   └── images/          # 所有图片资源
+    ├── components/
+    │   ├── js/              # Web Components
+    │   └── styles/          # 组件样式
+    ├── js/
+    │   ├── app.js           # 应用主逻辑
+    │   ├── authentication.js # Firebase 认证
+    │   ├── firebaseConfig.js # Firebase 配置
+    │   ├── logInPage.js     # 登录页面逻辑
+    │   └── main.js          # 主页面逻辑
+    ├── pages/
+    │   ├── login.html       # 登录页面
+    │   └── main.html        # 主应用页面
+    └── styles/              # 全局样式
+        ├── Adams.css
+        ├── index.css
+        ├── main.css
+        └── reset.css
 ```
 
 ---
