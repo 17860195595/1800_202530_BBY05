@@ -2,26 +2,26 @@ class AppNavbar extends HTMLElement {
   constructor() {
     super();
 
-    // 创建 shadow DOM，隔离内部样式
+    // Create shadow DOM to isolate internal styles
     const shadow = this.attachShadow({ mode: "open" });
-    // 创建 link 标签引入外部 CSS
+    // Create link tag to load external CSS
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
-    styleLink.setAttribute("href", "../components/styles/navbar.css");
+    styleLink.setAttribute("href", "/src/components/styles/navbar.css");
 
-    // 定义 HTML 模板
+    // Define HTML template
     const wrapper = document.createElement("div");
     wrapper.innerHTML = `
         <div class="nav">
       <div class="leftBox">
         <div class="imgBox">
-          <img src="../images/ClearWay_logo.png" alt="" />
+          <img src="/src/assets/images/ClearWay_logo.png" alt="" />
         </div>
         <div class="text">ClearWay</div>
       </div>
       <div class="rightBox">
         <div class="btn">
-          <img src="../images/menuBtn.png" alt="" />
+          <img src="/src/assets/images/menuBtn.png" alt="" />
         </div>
         <div class="menuBox">
           <div class="menuItem">Home</div>
@@ -32,7 +32,7 @@ class AppNavbar extends HTMLElement {
       </div>
     </div>
     `;
-    // 添加样式与内容
+    // Add styles and content
     shadow.appendChild(styleLink);
     shadow.appendChild(wrapper);
     this.initMenuBtn();
@@ -52,5 +52,5 @@ class AppNavbar extends HTMLElement {
   }
 }
 
-// 注册组件
+// Register component
 customElements.define("app-navbar", AppNavbar);

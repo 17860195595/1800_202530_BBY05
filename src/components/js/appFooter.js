@@ -2,29 +2,29 @@ class AppFooter extends HTMLElement {
   constructor() {
     super();
 
-    // 创建 shadow DOM，隔离内部样式
+    // Create shadow DOM to isolate internal styles
     const shadow = this.attachShadow({ mode: "open" });
-    // 创建 link 标签引入外部 CSS
+    // Create link tag to load external CSS
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
-    styleLink.setAttribute("href", "../components/styles/footer.css");
+    styleLink.setAttribute("href", "/src/components/styles/footer.css");
 
-    // 定义 HTML 模板
+    // Define HTML template
     const wrapper = document.createElement("div");
     wrapper.innerHTML = `
          <footer class="foot">
              <div class="foot-grid">
-             <div class="foot-image"><img src="../images/map.png" /></div>
-             <div class="foot-image"><img src="../images/traffic.png" /></div>
-             <div class="foot-image"><img src="../images/settings.png" /></div>
+             <div class="foot-image"><img src="/src/assets/images/map.png" /></div>
+             <div class="foot-image"><img src="/src/assets/images/traffic.png" /></div>
+             <div class="foot-image"><img src="/src/assets/images/settings.png" /></div>
              </div>
          </footer>
     `;
-    // 添加样式与内容
+    // Add styles and content
     shadow.appendChild(styleLink);
     shadow.appendChild(wrapper);
   }
 }
 
-// 注册组件
+// Register component
 customElements.define("app-footer", AppFooter);

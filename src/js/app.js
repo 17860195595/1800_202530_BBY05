@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 // Listen for authentication state and show username on main.html
-import { onAuthReady } from "../js/authentication.js";
+import { onAuthReady } from "./authentication.js";
 
 function initApp() {
   // Only run username logic on main.html
@@ -20,7 +20,7 @@ function initApp() {
         if (mainPageAlert)
           mainPageAlert.classList.add("d-none"),
             mainPageAlert.classList.remove("show");
-        window.location.href = "index.html";
+        window.location.href = "../../index.html";
       }
     });
   }
