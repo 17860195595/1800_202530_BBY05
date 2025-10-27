@@ -1,3 +1,24 @@
+// Helper functions to get paths
+function getComponentsPath(relativePath) {
+  const pathname = window.location.pathname;
+  
+  if (pathname.includes('/pages/')) {
+    return '../components/' + relativePath;
+  }
+  
+  return './src/components/' + relativePath;
+}
+
+function getPagesPath(filename) {
+  const pathname = window.location.pathname;
+  
+  if (pathname.includes('/pages/')) {
+    return './' + filename;  // Same directory as pages
+  }
+  
+  return './src/pages/' + filename;
+}
+
 class AppFooter extends HTMLElement {
   constructor() {
     super();
@@ -7,18 +28,7 @@ class AppFooter extends HTMLElement {
     // Create link tag to load external CSS
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
-    
-    // Use dynamic path based on current location
-    const currentPath = window.location.pathname;
-    let cssPath = "/src/components/styles/footer.css";
-    
-    if (currentPath.includes("/pages/")) {
-      cssPath = "../components/styles/footer.css";
-    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
-      cssPath = "./src/components/styles/footer.css";
-    }
-    
-    styleLink.setAttribute("href", cssPath);
+    styleLink.setAttribute("href", getComponentsPath('styles/footer.css'));
 
     // Define HTML template with icons
     const wrapper = document.createElement("div");
@@ -118,23 +128,13 @@ class AppFooter extends HTMLElement {
       }
     });
     
-    // Get current path and determine correct route
-    const currentPath = window.location.pathname;
-    let basePath = "/src/pages/";
-    
-    if (currentPath.includes("/pages/")) {
-      basePath = "./";
-    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
-      basePath = "./src/pages/";
-    }
-    
     // Direct navigation based on route
     if (route === 'favorites') {
-      window.location.href = basePath + 'favorateList.html';
+      window.location.href = getPagesPath('favorateList.html');
     } else if (route === 'search') {
-      window.location.href = basePath + 'main.html';
+      window.location.href = getPagesPath('main.html');
     } else if (route === 'traffic') {
-      window.location.href = basePath + 'main.html';
+      window.location.href = getPagesPath('main.html');
     } else if (route === 'settings') {
       console.log('Settings page not implemented yet');
     }

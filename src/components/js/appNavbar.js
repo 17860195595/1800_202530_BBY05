@@ -8,11 +8,19 @@ class AppNavbar extends HTMLElement {
     
     if (currentPath.includes("/pages/")) {
       return `../assets/images/${filename}`;
-    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
-      return `./src/assets/images/${filename}`;
     }
     
-    return `/src/assets/images/${filename}`;
+    return `./src/assets/images/${filename}`;
+  }
+  
+  getComponentsPath(relativePath) {
+    const pathname = window.location.pathname;
+    
+    if (pathname.includes('/pages/')) {
+      return '../components/' + relativePath;
+    }
+    
+    return './src/components/' + relativePath;
   }
 
   connectedCallback() {
@@ -24,18 +32,7 @@ class AppNavbar extends HTMLElement {
       // Create link tag to load external CSS
       const styleLink = document.createElement("link");
       styleLink.setAttribute("rel", "stylesheet");
-      
-      // Use dynamic path based on current location
-      const currentPath = window.location.pathname;
-      let cssPath = "/src/components/styles/navbar.css";
-      
-      if (currentPath.includes("/pages/")) {
-        cssPath = "../components/styles/navbar.css";
-      } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
-        cssPath = "./src/components/styles/navbar.css";
-      }
-      
-      styleLink.setAttribute("href", cssPath);
+      styleLink.setAttribute("href", this.getComponentsPath('styles/navbar.css'));
 
       // Get image paths
       const logoPath = this.getImagePath('ClearWay_logo.png');

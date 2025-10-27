@@ -12,15 +12,10 @@ class AppPageHeader extends HTMLElement {
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
     
-    // Use dynamic path based on current location
-    const currentPath = window.location.pathname;
-    let cssPath = "/src/components/styles/pageHeader.css";
-    
-    if (currentPath.includes("/pages/")) {
-      cssPath = "../components/styles/pageHeader.css";
-    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
-      cssPath = "./src/components/styles/pageHeader.css";
-    }
+    const pathname = window.location.pathname;
+    const cssPath = pathname.includes('/pages/') 
+      ? "../components/styles/pageHeader.css" 
+      : "./src/components/styles/pageHeader.css";
     
     styleLink.setAttribute("href", cssPath);
 
