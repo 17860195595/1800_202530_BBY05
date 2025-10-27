@@ -9,15 +9,10 @@ class AppSearchBar extends HTMLElement {
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
     
-    // Use dynamic path based on current location
-    const currentPath = window.location.pathname;
-    let cssPath = "/src/components/styles/searchbar.css";
-    
-    if (currentPath.includes("/pages/")) {
-      cssPath = "../components/styles/searchbar.css";
-    } else if (currentPath.endsWith("/index.html") || currentPath.endsWith("/")) {
-      cssPath = "./src/components/styles/searchbar.css";
-    }
+    const pathname = window.location.pathname;
+    const cssPath = pathname.includes('/pages/') 
+      ? "../components/styles/searchbar.css" 
+      : "./src/components/styles/searchbar.css";
     
     styleLink.setAttribute("href", cssPath);
 
