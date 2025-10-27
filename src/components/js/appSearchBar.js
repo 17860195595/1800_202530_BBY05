@@ -1,4 +1,4 @@
-class AppSearchBar extends HTMLElement {
+export class AppSearchBar extends HTMLElement {
   constructor() {
     super();
 
@@ -9,7 +9,18 @@ class AppSearchBar extends HTMLElement {
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
     
-    styleLink.setAttribute("href", "/src/components/styles/searchbar.css");
+    // Check if we're in production build by looking for assets scripts
+    const hasAssetsScript = document.querySelector('script[src*="assets/"]') || 
+                           document.querySelector('link[href*="assets/"]');
+    let cssPath;
+    if (hasAssetsScript) {
+      // Find the correct CSS file dynamically
+      const cssLink = document.querySelector('link[href*="assets/"][href$=".css"]');
+      cssPath = cssLink ? cssLink.href : '/assets/components-_ANuRjC4.css';
+    } else {
+      cssPath = '/src/components/styles/searchbar.css';
+    }
+    styleLink.setAttribute("href", cssPath);
 
     // Check if this is a standalone search page (has 'standalone' attribute)
     const isStandalone = this.hasAttribute('standalone');
@@ -154,6 +165,5 @@ class AppSearchBar extends HTMLElement {
   }
 }
 
-// Export component for registration
-export { AppSearchBar };
+// Component is already exported in class declaration
 

@@ -1,4 +1,4 @@
-class AppPageHeader extends HTMLElement {
+export class AppPageHeader extends HTMLElement {
   constructor() {
     super();
 
@@ -12,7 +12,18 @@ class AppPageHeader extends HTMLElement {
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
     
-    styleLink.setAttribute("href", "/src/components/styles/pageHeader.css");
+    // Check if we're in production build by looking for assets scripts
+    const hasAssetsScript = document.querySelector('script[src*="assets/"]') || 
+                           document.querySelector('link[href*="assets/"]');
+    let cssPath;
+    if (hasAssetsScript) {
+      // Find the correct CSS file dynamically
+      const cssLink = document.querySelector('link[href*="assets/"][href$=".css"]');
+      cssPath = cssLink ? cssLink.href : '/assets/components-_ANuRjC4.css';
+    } else {
+      cssPath = '/src/components/styles/pageHeader.css';
+    }
+    styleLink.setAttribute("href", cssPath);
 
     // Create HTML
     const wrapper = document.createElement("div");
@@ -61,6 +72,5 @@ class AppPageHeader extends HTMLElement {
   }
 }
 
-// Export component for registration
-export { AppPageHeader };
+// Component is already exported in class declaration
 

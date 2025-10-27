@@ -1,0 +1,1 @@
+import{g as e,i as a}from"./vendor-BbdJX2y9.js";const p={apiKey:"AIzaSyBgobrW_SzqAVxxQI-GP-xibMJUz4Znz3E",authDomain:"bby05project.firebaseapp.com",projectId:"bby05project",storageBucket:"bby05project.firebasestorage.app",messagingSenderId:"454132391937",appId:"1:454132391937:web:2ea558df68c80d106c2000"},t=a(p),i=e(t);export{i as auth};

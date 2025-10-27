@@ -3,7 +3,7 @@ function getPagesPath(filename) {
   return `/src/pages/${filename}`;
 }
 
-class AppFooter extends HTMLElement {
+export class AppFooter extends HTMLElement {
   constructor() {
     super();
 
@@ -13,8 +13,18 @@ class AppFooter extends HTMLElement {
     const styleLink = document.createElement("link");
     styleLink.setAttribute("rel", "stylesheet");
     
-    // Use absolute path from root
-    styleLink.setAttribute("href", "/src/components/styles/footer.css");
+    // Check if we're in production build by looking for assets scripts
+    const hasAssetsScript = document.querySelector('script[src*="assets/"]') || 
+                           document.querySelector('link[href*="assets/"]');
+    let cssPath;
+    if (hasAssetsScript) {
+      // Find the correct CSS file dynamically
+      const cssLink = document.querySelector('link[href*="assets/"][href$=".css"]');
+      cssPath = cssLink ? cssLink.href : '/assets/components-_ANuRjC4.css';
+    } else {
+      cssPath = '/src/components/styles/footer.css';
+    }
+    styleLink.setAttribute("href", cssPath);
 
     // Define HTML template with icons
     const wrapper = document.createElement("div");
@@ -127,5 +137,4 @@ class AppFooter extends HTMLElement {
   }
 }
 
-// Export component for registration
-export { AppFooter };
+// Component is already exported in class declaration
