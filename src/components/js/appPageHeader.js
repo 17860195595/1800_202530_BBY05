@@ -47,25 +47,29 @@ export class AppPageHeader extends HTMLElement {
     const backButton = shadow.querySelector("#backButton");
     
     if (backButton) {
-      backButton.addEventListener("click", () => {
-        // Determine where to go back based on the page
+      backButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Use reliable navigation based on current page
+        // This ensures components are always loaded correctly
         const currentPath = window.location.pathname;
         
-        if (currentPath.includes("/pages/search.html")) {
-          // From search page, go back to main or index
-          if (document.referrer && document.referrer.includes("main.html")) {
-            window.location.href = "./main.html";
-          } else if (document.referrer && document.referrer.includes("index.html")) {
-            window.location.href = "../index.html";
-          } else {
-            window.history.back();
-          }
+        if (currentPath.includes("/pages/routeDetail.html")) {
+          window.location.href = "./search.html";
+        } else if (currentPath.includes("/pages/search.html")) {
+          window.location.href = "./main.html";
+        } else if (currentPath.includes("/pages/favorateList.html")) {
+          window.location.href = "./main.html";
         } else if (currentPath.includes("/pages/main.html")) {
-          // From main page, go back to index
           window.location.href = "../index.html";
         } else {
-          // Default: use browser back
-          window.history.back();
+          // Default: try browser back, with fallback to index
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            window.location.href = "../index.html";
+          }
         }
       });
     }

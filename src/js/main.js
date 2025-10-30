@@ -110,10 +110,14 @@ function handleSearch(query) {
     return;
   }
 
-  // Use Nominatim API for geocoding search
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+  // Use Nominatim API for geocoding search (通过代理避免CORS)
+  const url = `/api/nominatim/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
 
-  fetch(url)
+  fetch(url, {
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
     .then(response => response.json())
     .then(data => {
       if (data && data.length > 0) {
