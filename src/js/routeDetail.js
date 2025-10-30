@@ -1,136 +1,199 @@
 // Route detail page functionality
+// ==============================================
+// Import Firebase
+// ==============================================
+import { db } from './firebaseConfig.js';
+import { collection, query, where, getDocs, addDoc, orderBy, limit, deleteDoc, doc } from 'firebase/firestore';
+import { buildDestinationKey, isFavorite, addFavorite, removeFavoriteByKey } from './favoritesService.js';
+import { fetchDrivingRoute, estimateDrivingMinutes } from './routingService.js';
+import { fetchReportsWithinBounds } from './trafficService.js';
+import { showToast, showWarn, showSuccess, showError } from './notifications.js';
+
+// ==============================================
+// State Management
+// ==============================================
 let map = null;
 let userLocationMarker = null;
 let userLocation = null;
 let destinationMarker = null;
 let routePolyline = null;
-let currentRouteData = null; // Store current route data globally
+let currentRouteData = null;
+let trafficMarkers = [];
 
+// ==============================================
+// Initialization
+// ==============================================
 document.addEventListener("DOMContentLoaded", function() {
-  // Initialize map
   initMap();
-  
-  // Load route detail from session storage
   loadRouteDetail();
-  
-  // Try to get user location on page load
   tryGetUserLocationOnInit();
-  
-  // Setup event listeners
   setupEventListeners();
-  
-  // Check if route is already saved in favorites
   checkIfRouteIsSaved();
+  
+  // Test Firebase connection
+  testFirebaseConnection();
 });
 
-function loadRouteDetail() {
-  const routeData = sessionStorage.getItem('routeDetail');
-  if (routeData) {
-    const result = JSON.parse(routeData);
-    currentRouteData = result; // Store globally for save functionality
-    displayRouteOnMap(result);
-    sessionStorage.removeItem('routeDetail'); // Clear after use
+// ==============================================
+// Map Management
+// ==============================================
+
+/** Initialize map */
+function initMap() {
+  if (typeof L === 'undefined') {
+    console.error('Leaflet map library not loaded');
+    return;
+  }
+
+  map = L.map('map').setView([49.2427, -123.0007], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+}
+
+/** Clear any map layer if exists */
+function clearMapLayer(layer) {
+  if (layer && map && map.hasLayer(layer)) {
+    map.removeLayer(layer);
   }
 }
 
+/** Clear all traffic markers */
+function clearAllTrafficMarkers() {
+  if (!map) return;
+  
+  trafficMarkers.forEach(marker => {
+    if (map.hasLayer(marker)) {
+      map.removeLayer(marker);
+    }
+  });
+  trafficMarkers = [];
+}
+
+// ==============================================
+// Route Data Management
+// ==============================================
+
+/** Load route detail from storage */
+function loadRouteDetail() {
+  // Prefer sessionStorage (written on navigation)
+  let routeData = sessionStorage.getItem('routeDetail');
+  // Fallback to localStorage on refresh
+  if (!routeData) {
+    routeData = localStorage.getItem('lastRouteDetail');
+  }
+  if (routeData) {
+    try {
+    const result = JSON.parse(routeData);
+      currentRouteData = result;
+    displayRouteOnMap(result);
+      // Persist last route detail for refresh restore
+      localStorage.setItem('lastRouteDetail', JSON.stringify(result));
+      // Keep sessionStorage for back navigation reuse
+    } catch (e) {
+      console.warn('Failed to parse routeDetail:', e);
+    }
+  } else {
+    console.log('No routeDetail found in session/local storage');
+    showWarn('No route data found. Please open from Search or Favorites');
+  }
+}
+
+/** Display route on map */
 function displayRouteOnMap(result) {
   if (!map) return;
   
-  // Remove previous destination marker and route
-  if (destinationMarker) {
-    map.removeLayer(destinationMarker);
-  }
-  if (routePolyline) {
-    map.removeLayer(routePolyline);
-  }
+  // Clear previous marker and route
+  clearMapLayer(destinationMarker);
+  clearMapLayer(routePolyline);
+  clearAllTrafficMarkers();
   
-  // Add marker for the selected location
+  // Add destination marker
   destinationMarker = L.marker([result.lat, result.lng]).addTo(map);
   destinationMarker.bindPopup(`
     <b>${result.name}</b><br>
     ${result.address}
   `);
   
-  // Draw route if user location is available
+  // Draw route if user location exists
   if (userLocation) {
     drawRoute(userLocation, [result.lat, result.lng]);
   } else {
-    // Center map on destination only
     map.setView([result.lat, result.lng], 15);
   }
   
-  console.log('显示路由详情:', result);
+  console.log('Display route detail:', result);
 }
 
+// ==============================================
+// Route Drawing
+// ==============================================
+
+/** Draw route */
 function drawRoute(start, end) {
   if (!map) return;
   
-  // Remove previous route
-  if (routePolyline) {
-    map.removeLayer(routePolyline);
-  }
+  clearMapLayer(routePolyline);
+  clearAllTrafficMarkers();
   
-  // Use OpenRouteService API to get actual route
   fetchRouteFromAPI(start, end);
 }
 
-// Fetch actual route from OpenRouteService API
+/** Fetch real route from OpenRouteService API */
 async function fetchRouteFromAPI(start, end) {
   try {
-    // Using OpenRouteService walking route API
-    const apiUrl = `https://api.openrouteservice.org/v2/directions/foot-walking`;
-    
-    const requestBody = {
-      coordinates: [
-        [start[1], start[0]], // [lon, lat] for OpenRouteService
-        [end[1], end[0]]
-      ]
-    };
-    
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Route API request failed');
-    }
-    
-    const data = await response.json();
-    
-    if (data.routes && data.routes.length > 0) {
-      const route = data.routes[0];
-      const geometry = route.geometry;
+    // 使用服务获取路线
+    const apiKey = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhjMzA4ODEzNTEyNjQ0YmJhOGY3MTQ4NTk2MzJlYWY1IiwiaCI6Im11cm11cjY0In0='; // demo key
+    const result = await fetchDrivingRoute(apiKey, start, end);
+    if (result && result.primary) {
+      const coordinates = result.primary.coordinates;
       
-      // Decode polyline to get coordinates
-      const coordinates = decodePolyline(geometry);
-      
-      // Draw the route on map
+      // Draw primary route on map
       routePolyline = L.polyline(coordinates, {
         color: '#007bff',
         weight: 4,
         opacity: 0.7
       }).addTo(map);
       
-      // Fit map to show the route
+      // Draw alternative routes (if any)
+      if (result.alternatives && result.alternatives.length > 0) {
+        drawAlternativeRoutes(result.alternatives.map(a => ({ geometry: null, coords: a.coordinates })));
+      }
+      
+      // Fit map to route bounds
       map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
       
-      // Update route info with actual distance and duration
-      const distance = route.summary.distance / 1000; // Convert to km
-      const duration = route.summary.duration; // in seconds
+      // Update route info (distance and duration)
+      const distance = result.primary.distanceKm; // km
+      const duration = result.primary.durationSec; // s
       
       updateRouteInfoFromAPI(distance, duration);
       
+      // Fetch traffic reports for this route if Firestore available
+      if (db) {
+        fetchTrafficReports(start, end);
+      } else {
+        console.warn('Firebase Firestore not available, skipping traffic reports');
+      }
+      
       console.log('Route fetched successfully:', { distance, duration });
+    } else {
+      console.warn('No routes found in API response');
+      showWarn('No route from service. Using straight line');
+      drawFallbackRoute(start, end);
     }
   } catch (error) {
     console.error('Failed to fetch route from API, using straight line:', error);
+    console.error('Error details:', error.message);
+    showWarn('Route service unavailable. Using straight line');
+    drawFallbackRoute(start, end);
+  }
+}
     
-    // Fallback to straight line if API fails
+/** Draw fallback straight-line route */
+function drawFallbackRoute(start, end) {
+  console.log('Using fallback straight line route');
+  
     routePolyline = L.polyline([start, end], {
       color: '#007bff',
       weight: 4,
@@ -141,12 +204,41 @@ async function fetchRouteFromAPI(start, end) {
     const bounds = [[start[0], start[1]], [end[0], end[1]]];
     map.fitBounds(bounds, { padding: [50, 50] });
     
-    // Use haversine distance as fallback
+  // Use Haversine distance as fallback
     updateRouteInfo(start, end);
+
+  // Fetch traffic reports if Firestore available
+  if (db) {
+    fetchTrafficReports(start, end);
+  } else {
+    console.warn('Firebase Firestore not available, skipping traffic reports');
   }
 }
 
-// Decode polyline from OpenRouteService
+/** Draw alternative routes (semi-transparent dashed) */
+function drawAlternativeRoutes(routes) {
+  try {
+    routes.forEach(r => {
+      let coords = null;
+      if (r.coords && Array.isArray(r.coords)) {
+        coords = r.coords;
+      } else if (r.geometry) {
+        coords = decodePolyline(r.geometry);
+      }
+      if (!coords || coords.length === 0) return;
+      L.polyline(coords, {
+        color: '#6c757d',
+        weight: 3,
+        opacity: 0.5,
+        dashArray: '6,6'
+      }).addTo(map);
+    });
+  } catch (e) {
+    console.warn('Failed to draw alternative routes:', e);
+  }
+}
+
+/** Decode OpenRouteService polyline */
 function decodePolyline(encoded) {
   if (!encoded) return [];
   
@@ -188,65 +280,72 @@ function decodePolyline(encoded) {
   return coordinates;
 }
 
-// Update route info from API data
+// ==============================================
+// Route Info Updates
+// ==============================================
+
+/** Update route info from API data */
 function updateRouteInfoFromAPI(distance, durationSeconds) {
-  // Update UI
   const distanceElement = document.getElementById('routeDistance');
   const durationElement = document.getElementById('routeDuration');
   
   if (distanceElement) {
-    if (distance >= 1) {
-      distanceElement.textContent = `${distance.toFixed(1)}km`;
-    } else {
-      distanceElement.textContent = `${Math.round(distance * 1000)}m`;
-    }
+    distanceElement.textContent = formatDistance(distance);
   }
   
   if (durationElement) {
-    const minutes = Math.round(durationSeconds / 60);
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      durationElement.textContent = `${hours}h ${mins}min`;
-    } else {
-      durationElement.textContent = `${minutes}min`;
-    }
+    durationElement.textContent = formatDuration(durationSeconds);
   }
 }
 
+/** Update route info (Haversine) */
 function updateRouteInfo(start, end) {
-  // Calculate distance (Haversine formula)
   const distance = calculateDistance(start[0], start[1], end[0], end[1]);
+  // Fallback driving estimate: average 50 km/h
+  const avgSpeedKmh = 50;
+  const timeInMinutes = Math.round((distance / avgSpeedKmh) * 60);
   
-  // Estimate time based on average walking speed (5 km/h)
-  const timeInMinutes = Math.round((distance / 5) * 60);
-  
-  // Update UI
   const distanceElement = document.getElementById('routeDistance');
   const durationElement = document.getElementById('routeDuration');
   
   if (distanceElement) {
-    if (distance >= 1) {
-      distanceElement.textContent = `${distance.toFixed(1)}km`;
-    } else {
-      distanceElement.textContent = `${Math.round(distance * 1000)}m`;
-    }
+    distanceElement.textContent = formatDistance(distance);
   }
   
   if (durationElement) {
-    if (timeInMinutes >= 60) {
-      const hours = Math.floor(timeInMinutes / 60);
-      const minutes = timeInMinutes % 60;
-      durationElement.textContent = `${hours}h ${minutes}min`;
-    } else {
-      durationElement.textContent = `${timeInMinutes}min`;
-    }
+    durationElement.textContent = formatDurationFromMinutes(timeInMinutes);
   }
 }
 
-// Haversine formula to calculate distance between two coordinates
+/** Format distance */
+function formatDistance(distanceKm) {
+  if (distanceKm >= 1) {
+    return `${distanceKm.toFixed(1)}km`;
+    } else {
+    return `${Math.round(distanceKm * 1000)}m`;
+  }
+}
+
+/** Format duration (from seconds) */
+function formatDuration(durationSeconds) {
+  const minutes = Math.round(durationSeconds / 60);
+  return formatDurationFromMinutes(minutes);
+}
+
+/** Format duration (from minutes) */
+function formatDurationFromMinutes(minutes) {
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}min`;
+  } else {
+    return `${minutes}min`;
+  }
+}
+
+/** Calculate distance using Haversine */
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth's radius in km
+  const R = 6371; // 地球半径（公里）
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
@@ -254,57 +353,98 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
     Math.sin(dLon/2) * Math.sin(dLon/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  const distance = R * c;
-  return distance;
+  return R * c;
 }
 
-function initMap() {
-  // Check if Leaflet is loaded
-  if (typeof L === 'undefined') {
-    console.error('Leaflet map library not loaded');
-    return;
-  }
+// ==============================================
+// User Location Management
+// ==============================================
 
-  // Initialize map centered on Vancouver, BC
-  map = L.map('map').setView([49.2827, -123.1207], 12);
-
-  // Add OpenStreetMap tiles
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
-}
-
-// 页面加载时尝试获取用户位置，如果失败则显示默认位置
+/** Try to get user location on page load */
 function tryGetUserLocationOnInit() {
   if (!navigator.geolocation) {
-    // 浏览器不支持地理位置，显示默认位置
     addDefaultMarker();
     return;
   }
 
-  // 尝试获取用户位置
+  navigator.geolocation.getCurrentPosition(
+    (position) => handleUserLocationSuccess(position),
+    (error) => {
+      console.log('Unable to get user location. Showing default:', error);
+      addDefaultMarker();
+    },
+    {
+      enableHighAccuracy: false,
+      timeout: 3000,
+      maximumAge: 300000
+    }
+  );
+}
+
+/** Get current user location */
+function getUserLocation() {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser');
+    return;
+  }
+
+  const getLocationBtn = document.getElementById('getLocation');
+  if (getLocationBtn) {
+    getLocationBtn.disabled = true;
+    getLocationBtn.style.opacity = '0.6';
+  }
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
+      handleUserLocationSuccess(position);
+      
+      // 更新位置输入框
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
+      updateLocationInput(lat, lng);
       
-      // 移除之前的用户位置标记
-      if (userLocationMarker) {
-        map.removeLayer(userLocationMarker);
+      // 如果有目的地，重新绘制路线
+      if (destinationMarker) {
+        drawRoute(userLocation, [destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng]);
       }
       
-      // 创建用户位置标记
-      userLocationMarker = L.marker([lat, lng], {
-        icon: L.divIcon({
-          className: 'user-location-marker',
-          html: '<div class="user-location-pulse"></div>',
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
-        })
-      }).addTo(map);
+      // 恢复按钮状态
+      if (getLocationBtn) {
+        getLocationBtn.disabled = false;
+        getLocationBtn.style.opacity = '1';
+      }
+    },
+    (error) => {
+      console.error('Failed to get location:', error);
+      const errorMessage = getGeolocationErrorMessage(error);
+      alert(errorMessage);
       
-      // 添加用户位置圆圈
-      const accuracy = position.coords.accuracy;
+      if (getLocationBtn) {
+        getLocationBtn.disabled = false;
+        getLocationBtn.style.opacity = '1';
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000
+    }
+  );
+}
+
+/** Handle successful user location retrieval */
+function handleUserLocationSuccess(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+  const accuracy = position.coords.accuracy;
+      
+      // 移除之前的用户位置标记
+  clearMapLayer(userLocationMarker);
+      
+      // 创建用户位置标记
+  userLocationMarker = createUserLocationMarker(lat, lng);
+  
+  // 添加精度圆圈
       L.circle([lat, lng], {
         radius: accuracy,
         color: '#007bff',
@@ -316,21 +456,15 @@ function tryGetUserLocationOnInit() {
       // 保存用户位置
       userLocation = [lat, lng];
       
-      // 居中地图到用户位置或显示两个位置
-      if (destinationMarker) {
-        // If destination exists, fit bounds to show both
-        const bounds = [[lat, lng], [destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng]];
-        map.fitBounds(bounds, { padding: [50, 50] });
-      } else {
-        map.setView([lat, lng], 15);
-      }
-      
-      // 显示用户位置信息
+  // 调整地图视野
+  adjustMapViewForUserLocation(lat, lng);
+  
+  // 绑定弹出窗口
       userLocationMarker.bindPopup(`
-        <b>我的位置</b><br>
-        纬度: ${lat.toFixed(6)}<br>
-        经度: ${lng.toFixed(6)}<br>
-        精度: ±${Math.round(accuracy)}米
+        <b>My location</b><br>
+        Lat: ${lat.toFixed(6)}<br>
+        Lng: ${lng.toFixed(6)}<br>
+        Accuracy: ±${Math.round(accuracy)}m
       `).openPopup();
       
       // 如果有目的地，绘制路线
@@ -338,166 +472,611 @@ function tryGetUserLocationOnInit() {
         drawRoute(userLocation, [destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng]);
       }
       
-      console.log('成功获取用户位置');
-    },
-    (error) => {
-      console.log('无法获取用户位置，显示默认位置:', error);
-      // 获取位置失败，显示默认位置
-      addDefaultMarker();
-    },
-    {
-      enableHighAccuracy: false, // 初始化时不需要高精度
-      timeout: 3000,              // 3秒超时
-      maximumAge: 300000          // 5分钟缓存
-    }
-  );
+      console.log('User location obtained');
 }
 
-// 添加默认位置标记
+/** Create user location marker */
+function createUserLocationMarker(lat, lng) {
+  return L.marker([lat, lng], {
+    icon: L.divIcon({
+      className: 'user-location-marker',
+      html: '<div class="user-location-pulse"></div>',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    })
+  }).addTo(map);
+}
+
+/** Adjust map view for user location */
+function adjustMapViewForUserLocation(lat, lng) {
+  if (destinationMarker) {
+    const bounds = [[lat, lng], [destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng]];
+    map.fitBounds(bounds, { padding: [50, 50] });
+  } else {
+    map.setView([lat, lng], 15);
+  }
+}
+
+/** Get geolocation error message */
+function getGeolocationErrorMessage(error) {
+  let errorMessage = 'Failed to get location: ';
+  switch(error.code) {
+    case error.PERMISSION_DENIED:
+      errorMessage += 'Permission denied';
+      break;
+    case error.POSITION_UNAVAILABLE:
+      errorMessage += 'Position unavailable';
+      break;
+    case error.TIMEOUT:
+      errorMessage += 'Request timed out';
+      break;
+    default:
+      errorMessage += 'Unknown error';
+      break;
+  }
+  return errorMessage;
+}
+
+/** Add default location marker */
 function addDefaultMarker() {
   const defaultMarker = L.marker([49.2827, -123.1207]).addTo(map);
-  defaultMarker.bindPopup('<b>Vancouver</b><br>默认位置').openPopup();
+  defaultMarker.bindPopup('<b>Vancouver</b><br>Default location').openPopup();
   map.setView([49.2827, -123.1207], 12);
-  console.log('显示默认位置');
+  console.log('Show default location');
 }
 
-function setupEventListeners() {
-  // Location button
-  const getLocationBtn = document.getElementById('getLocation');
-  if (getLocationBtn) {
-    getLocationBtn.addEventListener('click', () => {
-      console.log('获取位置按钮被点击');
-      getUserLocation();
+/**
+ * 更新位置输入框
+ */
+function updateLocationInput(lat, lng) {
+  const locationInput = document.getElementById('userLocation');
+  if (!locationInput) return;
+  
+  fetch(`/api/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`, {
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.display_name) {
+        locationInput.value = data.display_name.split(',')[0] || 'Current Location';
+      } else {
+        locationInput.value = 'Current Location';
+      }
+    })
+    .catch(error => {
+      console.error('Reverse geocoding failed:', error);
+      locationInput.value = 'Current Location';
     });
-  }
+}
 
-  // Save button
-  const saveBtn = document.getElementById('saveRoute');
-  if (saveBtn) {
-    saveBtn.addEventListener('click', () => {
-      saveRoute();
-    });
-  }
+// ==============================================
+// Traffic Reports Data Fetching
+// ==============================================
 
-  // Share button
-  const shareBtn = document.getElementById('shareRoute');
-  if (shareBtn) {
-    shareBtn.addEventListener('click', () => {
-      shareRoute();
-    });
+/**
+ * Fetch traffic reports from Firestore
+ * @param {Array} start - [lat, lng] start coord
+ * @param {Array} end - [lat, lng] end coord
+ */
+async function fetchTrafficReports(start, end) {
+  try {
+    console.log('Attempting to fetch traffic reports from Firestore...');
+    
+    // Ensure db initialized
+    if (!db) {
+      console.error('Firebase Firestore not initialized');
+      return;
+    }
+    
+    // Calculate route bounds
+    const bounds = calculateRouteBounds(start, end);
+    
+    // Query Firestore
+  const reports = await fetchReportsWithinBounds(db, bounds, 2);
+  displayTrafficReports(reports);
+  console.log('Traffic reports fetched from Firestore:', reports.length);
+  } catch (error) {
+    console.error('Failed to fetch traffic reports from Firestore:', error);
+    console.error('Error details:', error.message);
+    console.error('Error code:', error.code);
+    
+    // More specific hints for permission errors
+    if (error.code === 'permission-denied') {
+      console.warn('Firestore permission denied. Please check your security rules.');
+    } else if (error.code === 'unavailable') {
+      console.warn('Firestore service unavailable. Please check your internet connection.');
+    }
+    
+    // No user-facing error; traffic reports are optional
   }
 }
 
-// Check if current route is already saved in favorites
+/** Calculate route bounds */
+function calculateRouteBounds(start, end) {
+  const lat1 = start[0];
+  const lng1 = start[1];
+  const lat2 = end[0];
+  const lng2 = end[1];
+  
+  // Add ~10km buffer to include more reports
+  const buffer = 0.1; // ~10km lat/lng buffer
+  
+  const bounds = {
+    minLat: Math.min(lat1, lat2) - buffer,
+    maxLat: Math.max(lat1, lat2) + buffer,
+    minLng: Math.min(lng1, lng2) - buffer,
+    maxLng: Math.max(lng1, lng2) + buffer
+  };
+  
+  console.log('Route bounds:', bounds);
+  console.log('Start:', start, 'End:', end);
+  
+  return bounds;
+}
+
+/** Check whether a report is near the route */
+function isReportNearRoute(report, start, end) {
+  // Use larger threshold to show more
+  const maxDistance = 5; // ~5km relaxed threshold
+  
+  const distanceToStart = calculateDistance(report.lat, report.lng, start[0], start[1]);
+  const distanceToEnd = calculateDistance(report.lat, report.lng, end[0], end[1]);
+  
+  const isNear = distanceToStart <= maxDistance || distanceToEnd <= maxDistance;
+  
+  console.log(`Report ${report.username || 'Unknown'}:`, {
+    position: [report.lat, report.lng],
+    distanceToStart: distanceToStart.toFixed(2) + 'km',
+    distanceToEnd: distanceToEnd.toFixed(2) + 'km',
+    maxDistance: maxDistance + 'km',
+    isNear: isNear
+  });
+  
+  return isNear;
+}
+
+/**
+ * 测试 Firebase Firestore 连接
+ */
+async function testFirebaseConnection() {
+  try {
+    console.log('Testing Firebase Firestore connection...');
+    console.log('Firestore instance:', db);
+    
+    if (!db) {
+      console.error('Firebase Firestore not initialized');
+      return;
+    }
+    
+    // 尝试读取 trafficReports 集合
+    const testRef = collection(db, 'trafficReports');
+    console.log('Test collection ref created:', testRef);
+    
+    const snapshot = await getDocs(testRef);
+    console.log('Test snapshot:', snapshot);
+    
+    if (!snapshot.empty) {
+      console.log('Firebase Firestore connection test successful - data found');
+      console.log('Number of documents:', snapshot.size);
+    } else {
+      console.log('Firebase Firestore connection test successful - no data in collection (this is normal)');
+    }
+  } catch (error) {
+    console.error('Firebase Firestore connection test failed:', error);
+    console.error('Error details:', error.message);
+    console.error('Error code:', error.code);
+    
+    // 如果是权限错误，提供更具体的帮助
+    if (error.code === 'permission-denied') {
+      console.warn('Permission denied. Please check your Firestore security rules.');
+      console.warn('Temporary solution: Go to Firebase Console > Firestore > Rules and set:');
+      console.warn('rules_version = "2";');
+      console.warn('service cloud.firestore {');
+      console.warn('  match /databases/{database}/documents {');
+      console.warn('    match /{document=**} {');
+      console.warn('      allow read, write: if true;');
+      console.warn('    }');
+      console.warn('  }');
+      console.warn('}');
+    } else if (error.code === 'unavailable') {
+      console.warn('Firestore service unavailable. Please check your internet connection and Firebase project status.');
+    }
+  }
+}
+
+/**
+ * 向 Firebase Firestore 添加新的交通报告（示例函数）
+ * @param {Object} reportData - 报告数据
+ * @param {number} reportData.lat - 纬度
+ * @param {number} reportData.lng - 经度
+ * @param {string} reportData.username - 用户名
+ * @param {string} reportData.type - 报告类型
+ * @param {string} reportData.comment - 评论
+ */
+async function addTrafficReport(reportData) {
+  try {
+    const trafficReportsRef = collection(db, 'trafficReports');
+    
+    const report = {
+      lat: reportData.lat,
+      lng: reportData.lng,
+      username: reportData.username || 'Anonymous',
+      type: reportData.type || 'unknown',
+      comment: reportData.comment || '',
+      createAt: new Date(),
+      timestamp: new Date()
+    };
+    
+    const docRef = await addDoc(trafficReportsRef, report);
+    console.log('Traffic report added to Firestore:', report);
+    console.log('Document ID:', docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error('Failed to add traffic report to Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * 在地图上显示交通报告标记
+ * @param {Array} reports - 报告数组，每个报告包含坐标和报告数据
+ */
+function displayTrafficReports(reports) {
+  if (!reports || !Array.isArray(reports) || reports.length === 0) {
+    return;
+  }
+  
+  // 清除之前的交通标记（如果需要在获取新数据时清除）
+  // clearAllTrafficMarkers();
+  
+  reports.forEach(report => {
+    // 解析坐标（支持 [lat, lng] 或 { lat, lng } 格式）
+    let position = null;
+    if (Array.isArray(report.position)) {
+      position = report.position;
+    } else if (report.position && typeof report.position === 'object') {
+      position = [report.position.lat, report.position.lng];
+    } else if (report.lat !== undefined && report.lng !== undefined) {
+      position = [report.lat, report.lng];
+    }
+    
+    if (!position || position.length < 2) {
+      console.warn('Invalid report position:', report);
+    return;
+  }
+  
+    // 构建报告数据对象
+    const reportData = {
+      username: report.username,
+      type: report.type,
+      comment: report.comment,
+      createdAt: report.createdAt || report.created_at || report.timestamp
+    };
+    
+    // 添加交通标记，携带报告数据
+    addTrafficMarker(position, {
+      tooltip: '点击查看交通状况',
+      report: reportData
+    });
+  });
+}
+
+// ==============================================
+// 交通标记管理 - Traffic Marker Management
+// ==============================================
+
+/**
+ * 在路线上添加交通标记
+ * @param {Array} position - [lat, lng] 坐标
+ * @param {Object} options - 选项配置
+ * @returns {Object|null} 标记实例
+ */
+function addTrafficMarker(position, options = {}) {
+  if (!map) {
+    console.error('Map not initialized');
+    return null;
+  }
+  
+  if (!position || position.length < 2) {
+    console.error('Invalid position:', position);
+    return null;
+  }
+  
+  const defaultOptions = {
+    tooltip: 'View traffic',
+    onClick: null,
+    iconSize: [40, 40],
+    ...options
+  };
+  
+  const trafficIcon = createTrafficIcon(defaultOptions);
+  
+  try {
+    const marker = L.marker([position[0], position[1]], {
+      icon: trafficIcon,
+      zIndexOffset: 1000,
+      riseOnHover: true
+    }).addTo(map);
+    
+    setupTrafficMarkerEvents(marker, position, defaultOptions);
+    trafficMarkers.push(marker);
+    
+    return marker;
+    
+  } catch (error) {
+    console.error('Error adding traffic marker:', error);
+    return null;
+  }
+}
+
+/**
+ * 创建交通图标
+ */
+function createTrafficIcon(options) {
+  const trafficIconHtml = `
+    <div style="
+      width: ${options.iconSize[0]}px;
+      height: ${options.iconSize[1]}px;
+      background-color: #ff4444;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    ">🚦</div>
+  `;
+  
+  return L.divIcon({
+    className: 'traffic-icon-marker',
+    html: trafficIconHtml,
+    iconSize: options.iconSize,
+    iconAnchor: [options.iconSize[0] / 2, options.iconSize[1] / 2]
+  });
+}
+
+/**
+ * 设置交通标记事件
+ */
+function setupTrafficMarkerEvents(marker, position, options) {
+  marker.on('click', (e) => {
+    console.log('Traffic marker clicked');
+    e.originalEvent.stopPropagation();
+    
+    if (options.onClick) {
+      options.onClick(e, marker, position);
+    } else {
+      showTrafficDetailModal();
+      // 如果标记携带报告数据，则渲染到模态框
+      if (options.report) {
+        renderTrafficReport(options.report);
+      }
+    }
+  });
+  
+  if (options.tooltip) {
+    marker.bindTooltip(options.tooltip, {
+      permanent: false,
+      direction: 'top',
+      offset: [0, -15],
+      className: 'traffic-tooltip',
+      opacity: 0.9
+    });
+  }
+  
+  marker.on('mouseover', function() {
+    this.setZIndexOffset(1500);
+  });
+  
+  marker.on('mouseout', function() {
+    this.setZIndexOffset(1000);
+  });
+}
+
+// ==============================================
+// Traffic Report Rendering
+// ==============================================
+
+/** Render user report into traffic modal */
+function renderTrafficReport(report) {
+  const nameEl = document.getElementById('trafficReporterName');
+  const typeEl = document.getElementById('trafficReportType');
+  const commentEl = document.getElementById('trafficReportComment');
+  const timeEl = document.getElementById('trafficReportTime');
+  
+  if (nameEl) nameEl.textContent = report?.username || '-';
+  if (typeEl) typeEl.textContent = mapReportTypeToLabel(report?.type);
+  if (commentEl) commentEl.textContent = report?.comment || '-';
+  if (timeEl) timeEl.textContent = formatTimeAgo(report?.createdAt) || '—';
+}
+
+/** Map report type to label */
+function mapReportTypeToLabel(type) {
+  const map = {
+    accident: 'Accident',
+    construction: 'Construction'
+  };
+  if (!type) return '-';
+  const key = String(type).toLowerCase();
+  return map[key] || type;
+}
+
+/** Normalize backend timestamp to milliseconds */
+function normalizeTimestamp(input) {
+  if (!input) return null;
+  try {
+    // Firebase Timestamp 对象
+    if (typeof input === 'object') {
+      if (typeof input.toDate === 'function') {
+        return input.toDate().getTime();
+      }
+      if (typeof input.seconds === 'number') {
+        return (input.seconds * 1000) + Math.floor((input.nanoseconds || 0) / 1e6);
+      }
+    }
+    // 数字：可能是秒或毫秒
+    if (typeof input === 'number') {
+      return input < 1e12 ? input * 1000 : input;
+    }
+    // Date 或可解析字符串
+    const parsed = (input instanceof Date) ? input.getTime() : new Date(input).getTime();
+    return Number.isNaN(parsed) ? null : parsed;
+  } catch (_e) {
+    return null;
+  }
+}
+
+/** Format time ago string */
+function formatTimeAgo(input) {
+  if (!input) return '';
+  const now = Date.now();
+  const ts = normalizeTimestamp(input);
+  if (Number.isNaN(ts)) return '';
+  const diffMs = Math.max(0, now - ts);
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'Just now';
+  if (diffMin < 60) return `${diffMin} min ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay} d ago`;
+}
+
+/**
+ * 移除特定交通标记
+ */
+function removeTrafficMarker(marker) {
+  if (!map || !marker) return;
+  
+  clearMapLayer(marker);
+  
+  const index = trafficMarkers.indexOf(marker);
+  if (index > -1) {
+    trafficMarkers.splice(index, 1);
+  }
+}
+
+// ==============================================
+// Favorite Management
+// ==============================================
+
+/** Check if current route is saved */
 function checkIfRouteIsSaved() {
-  // Wait for currentRouteData to be loaded
   if (!currentRouteData) {
-    // If not loaded yet, check after a short delay
     setTimeout(checkIfRouteIsSaved, 100);
     return;
   }
   
-  // Get all favorite routes from localStorage
-  const favoriteRoutes = JSON.parse(localStorage.getItem('favoriteRoutes') || '[]');
-  
-  // Check if current route is in favorites
-  const isSaved = favoriteRoutes.some(fav => 
-    Math.abs(fav.toLat - currentRouteData.lat) < 0.001 && 
-    Math.abs(fav.toLng - currentRouteData.lng) < 0.001
-  );
-  
-  if (isSaved) {
-    // Update button to show saved state
-    const saveBtn = document.getElementById('saveRoute');
-    if (saveBtn) {
-      saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Saved</span>';
-      saveBtn.style.background = '#28a745';
-    }
-  }
+  // Firestore: check via service
+  if (!db) return;
+  isFavorite(currentRouteData.lat, currentRouteData.lng)
+    .then((ok) => ok && updateSaveButtonUI(true))
+    .catch(err => console.warn('checkIfRouteIsSaved failed:', err));
 }
 
-function saveRoute() {
-  // Check if we have current route data
+/** Save or unsave route */
+async function saveRoute() {
   if (!currentRouteData) {
     console.log('No route data to save');
     alert('No route data available to save');
     return;
   }
-  
-  // Get existing favorites
-  const existingFavorites = JSON.parse(localStorage.getItem('favoriteRoutes') || '[]');
-  
-  // Check if route already exists (by destination coordinates)
-  const existingIndex = existingFavorites.findIndex(fav => 
-    Math.abs(fav.toLat - currentRouteData.lat) < 0.001 && 
-    Math.abs(fav.toLng - currentRouteData.lng) < 0.001
-  );
-  
-  const saveBtn = document.getElementById('saveRoute');
-  
-  if (existingIndex !== -1) {
-    // Route already saved, remove it
-    existingFavorites.splice(existingIndex, 1);
-    localStorage.setItem('favoriteRoutes', JSON.stringify(existingFavorites));
-    
-    // Update button to show unsaved state
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Unsaved</span>';
-    saveBtn.style.background = '#dc3545';
-    
-    setTimeout(() => {
-      saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Save</span>';
-      saveBtn.style.background = '#333';
-    }, 2000);
-    
-    console.log('Route removed from favorites');
+  if (!db) {
+    alert('Database not available.');
+    showError('Database unavailable');
     return;
   }
-  
-  // Add new route
+
+  const key = buildDestinationKey(currentRouteData.lat, currentRouteData.lng);
+
+  // 已存在 -> 删除（取消收藏）
+  if (await isFavorite(currentRouteData.lat, currentRouteData.lng)) {
+    await removeFavoriteByKey(currentRouteData.lat, currentRouteData.lng);
+    updateSaveButtonUI(false, true);
+    setTimeout(() => updateSaveButtonUI(false), 1500);
+    console.log('Route removed from favorites (Firestore)');
+    showWarn('Removed from favorites');
+    return;
+  }
+
+  // 新增收藏
+  const fav = createFavoriteRouteObject();
+  const payload = {
+    ...fav,
+    key,
+    savedAt: new Date()
+  };
+  const newDoc = await addFavorite(payload);
+  console.log('Route saved to favorites (Firestore):', newDoc.id, payload);
+  updateSaveButtonUI(true);
+  setTimeout(() => updateSaveButtonUI(true, false, true), 1500);
+  showSuccess('Added to favorites');
+}
+
+/**
+ * 获取收藏列表
+ */
+function getFavoriteRoutes() {
+  // 兼容旧逻辑：不再使用，但保留避免报错
+  return JSON.parse(localStorage.getItem('favoriteRoutes') || '[]');
+}
+
+/**
+ * 保存收藏列表
+ */
+function saveFavoriteRoutes(routes) {
+  // 兼容旧逻辑：不再使用
+  localStorage.setItem('favoriteRoutes', JSON.stringify(routes));
+}
+
+/** Create favorite route object */
+function createFavoriteRouteObject() {
   const userLocationInput = document.getElementById('userLocation');
   const distanceElement = document.getElementById('routeDistance');
   const durationElement = document.getElementById('routeDuration');
   
-  // Get current route info
-  const from = userLocationInput ? userLocationInput.value || 'Current Location' : 'Current Location';
-  const to = currentRouteData.name;
-  const distance = distanceElement ? distanceElement.textContent : 'Unknown';
-  const duration = durationElement ? durationElement.textContent : 'Unknown';
-  
-  // Create favorite route object
-  const favoriteRoute = {
-    id: Date.now(), // Unique ID
-    from: from,
-    to: to,
+  return {
+    id: Date.now(),
+    from: userLocationInput ? userLocationInput.value || 'Current Location' : 'Current Location',
+    to: currentRouteData.name,
     toAddress: currentRouteData.address,
     toLat: currentRouteData.lat,
     toLng: currentRouteData.lng,
-    distance: distance,
-    duration: duration,
+    distance: distanceElement ? distanceElement.textContent : 'Unknown',
+    duration: durationElement ? durationElement.textContent : 'Unknown',
     savedAt: new Date().toISOString()
   };
-  
-  existingFavorites.push(favoriteRoute);
-  
-  // Save to localStorage
-  localStorage.setItem('favoriteRoutes', JSON.stringify(existingFavorites));
-  
-  // Update button UI
-  const originalText = saveBtn.innerHTML;
-  saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Saved!</span>';
-  saveBtn.style.background = '#28a745';
-  
-  setTimeout(() => {
-    saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Saved</span>';
-    saveBtn.style.background = '#28a745';
-  }, 2000);
-  
-  console.log('Route saved to favorites:', favoriteRoute);
 }
 
+/** Update save button UI */
+function updateSaveButtonUI(isSaved, isUnsaved = false, isJustSaved = false) {
+  const saveBtn = document.getElementById('saveRoute');
+  if (!saveBtn) return;
+  
+  if (isUnsaved) {
+    saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Unsaved</span>';
+    saveBtn.style.background = '#dc3545';
+  } else if (isJustSaved) {
+  saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Saved!</span>';
+  saveBtn.style.background = '#28a745';
+  } else if (isSaved) {
+    saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Saved</span>';
+    saveBtn.style.background = '#28a745';
+  } else {
+    saveBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg><span>Save</span>';
+    saveBtn.style.background = '#333';
+  }
+}
+
+/** Share route */
 function shareRoute() {
-  // Simulate sharing route
   if (navigator.share) {
     navigator.share({
       title: 'Route Detail',
@@ -523,137 +1102,79 @@ function shareRoute() {
   console.log('Route shared');
 }
 
-// 更新位置输入框
-function updateLocationInput(lat, lng) {
-  const locationInput = document.getElementById('userLocation');
-  if (locationInput) {
-    // 使用反向地理编码获取地址
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.display_name) {
-          locationInput.value = data.display_name.split(',')[0] || 'Current Location';
+// ==============================================
+// Traffic Info Modal
+// ==============================================
+
+/** Show traffic detail modal */
+function showTrafficDetailModal() {
+  const trafficDetailModal = document.getElementById('trafficDetailModal');
+  if (trafficDetailModal) {
+    trafficDetailModal.classList.add('show');
         } else {
-          locationInput.value = 'Current Location';
-        }
-      })
-      .catch(error => {
-        console.error('Reverse geocoding failed:', error);
-        locationInput.value = 'Current Location';
-      });
+    console.error('Traffic detail modal not found');
   }
 }
 
-// 获取用户当前位置
-function getUserLocation() {
-  if (!navigator.geolocation) {
-    alert('您的浏览器不支持地理位置功能');
-    return;
-  }
+// ==============================================
+// Event Listeners Setup
+// ==============================================
 
+/** Setup all event listeners */
+function setupEventListeners() {
+  setupLocationButton();
+  setupSaveButton();
+  setupShareButton();
+  setupTrafficModal();
+}
+
+/** Setup location button */
+function setupLocationButton() {
   const getLocationBtn = document.getElementById('getLocation');
   if (getLocationBtn) {
-    getLocationBtn.disabled = true;
-    getLocationBtn.style.opacity = '0.6';
-    // 不改变SVG内容，只调整透明度和禁用状态
+    getLocationBtn.addEventListener('click', () => {
+      console.log('Get location button clicked');
+      getUserLocation();
+    });
   }
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      
-      // 移除之前的用户位置标记
-      if (userLocationMarker) {
-        map.removeLayer(userLocationMarker);
-      }
-      
-      // 创建用户位置标记
-      userLocationMarker = L.marker([lat, lng], {
-        icon: L.divIcon({
-          className: 'user-location-marker',
-          html: '<div class="user-location-pulse"></div>',
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
-        })
-      }).addTo(map);
-      
-      // 添加用户位置圆圈
-      const accuracy = position.coords.accuracy;
-      L.circle([lat, lng], {
-        radius: accuracy,
-        color: '#007bff',
-        fillColor: '#007bff',
-        fillOpacity: 0.1,
-        weight: 2
-      }).addTo(map);
-      
-      // 保存用户位置
-      userLocation = [lat, lng];
-      
-      // 居中地图到用户位置或显示两个位置
-      if (destinationMarker) {
-        // If destination exists, fit bounds to show both
-        const bounds = [[lat, lng], [destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng]];
-        map.fitBounds(bounds, { padding: [50, 50] });
-      } else {
-        map.setView([lat, lng], 15);
-      }
-      
-      // 显示用户位置信息
-      userLocationMarker.bindPopup(`
-        <b>我的位置</b><br>
-        纬度: ${lat.toFixed(6)}<br>
-        经度: ${lng.toFixed(6)}<br>
-        精度: ±${Math.round(accuracy)}米
-      `).openPopup();
-      
-      // 更新位置输入框
-      updateLocationInput(lat, lng);
-      
-      // 如果有目的地，绘制路线
-      if (destinationMarker) {
-        drawRoute(userLocation, [destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng]);
-      }
-      
-      // 恢复按钮状态
-      if (getLocationBtn) {
-        getLocationBtn.disabled = false;
-        getLocationBtn.style.opacity = '1';
-      }
-    },
-    (error) => {
-      console.error('获取位置失败:', error);
-      
-      let errorMessage = '获取位置失败: ';
-      switch(error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage += '用户拒绝了位置请求';
-          break;
-        case error.POSITION_UNAVAILABLE:
-          errorMessage += '位置信息不可用';
-          break;
-        case error.TIMEOUT:
-          errorMessage += '获取位置超时';
-          break;
-        default:
-          errorMessage += '未知错误';
-          break;
-      }
-      
-      alert(errorMessage);
-      
-      // 恢复按钮状态
-      if (getLocationBtn) {
-        getLocationBtn.disabled = false;
-        getLocationBtn.style.opacity = '1';
-      }
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 60000
-    }
-  );
 }
 
+/** Setup save button */
+function setupSaveButton() {
+  const saveBtn = document.getElementById('saveRoute');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      saveRoute();
+    });
+  }
+}
+
+/** Setup share button */
+function setupShareButton() {
+  const shareBtn = document.getElementById('shareRoute');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      shareRoute();
+    });
+  }
+}
+
+/** Setup traffic modal events */
+function setupTrafficModal() {
+  const trafficDetailModal = document.getElementById('trafficDetailModal');
+  const trafficCloseBtn = document.getElementById('trafficCloseBtn');
+
+  if (trafficCloseBtn && trafficDetailModal) {
+    trafficCloseBtn.addEventListener('click', () => {
+      trafficDetailModal.classList.remove('show');
+    });
+  }
+
+  if (trafficDetailModal) {
+    trafficDetailModal.addEventListener('click', (e) => {
+      if (e.target === trafficDetailModal) {
+        trafficDetailModal.classList.remove('show');
+      }
+    });
+  }
+}

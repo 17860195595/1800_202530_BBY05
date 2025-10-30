@@ -53,7 +53,21 @@ export default defineConfig({
   
   server: {
     port: 5173,
-    open: true
+    open: true,
+    proxy: {
+      '/api/nominatim': {
+        target: 'https://nominatim.openstreetmap.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/nominatim/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            // 添加必要的headers
+            proxyReq.setHeader('User-Agent', 'ClearWay Search App');
+            proxyReq.setHeader('Accept', 'application/json');
+          });
+        }
+      }
+    }
   },
   
   preview: {

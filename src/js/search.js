@@ -28,12 +28,12 @@ async function handleSearch(query) {
   const searchResults = document.getElementById("searchResults");
   
   if (!query || query.trim() === "") {
-    searchResults.innerHTML = '<p>请输入搜索内容</p>';
+    searchResults.innerHTML = '<p>Please enter a search term</p>';
     return;
   }
 
   // Show loading state
-  searchResults.innerHTML = '<p>搜索中...</p>';
+  searchResults.innerHTML = '<p>Searching...</p>';
 
   try {
     // 使用真实的地理编码API查询位置
@@ -41,23 +41,24 @@ async function handleSearch(query) {
     searchResultsData = results;
     
     if (results.length === 0) {
-      searchResults.innerHTML = '<p>未找到相关位置</p>';
+      searchResults.innerHTML = '<p>No results found</p>';
       return;
     }
     
     // Display results
     displaySearchResults(results, searchResults);
   } catch (error) {
-    console.error('搜索错误:', error);
-    searchResults.innerHTML = '<p>搜索失败，请稍后重试</p>';
+    console.error('Search error:', error);
+    searchResults.innerHTML = '<p>Search failed. Please try again later</p>';
   }
 }
 
-// 使用Nominatim API进行真实的地理编码搜索
+// Use Nominatim API for real geocoding search
 async function searchRealLocations(query) {
   try {
-    // 构建搜索URL，限制在温哥华地区
-    const searchUrl = `https://nominatim.openstreetmap.org/search?` +
+    // Build search URL scoped to Vancouver area
+    // Use proxy path to avoid CORS issues
+    const searchUrl = `/api/nominatim/search?` +
       `q=${encodeURIComponent(query)}&` +
       `format=json&` +
       `limit=5&` +
@@ -67,8 +68,9 @@ async function searchRealLocations(query) {
       `addressdetails=1`;
     
     const response = await fetch(searchUrl, {
+      method: 'GET',
       headers: {
-        'User-Agent': 'ClearWay Search App'
+        'Accept': 'application/json'
       }
     });
     
@@ -78,7 +80,7 @@ async function searchRealLocations(query) {
     
     const data = await response.json();
     
-    // 转换API响应为我们的格式
+    // Normalize API response to our format
     return data.map((item, index) => ({
       name: item.display_name.split(',')[0] || query,
       address: item.display_name,
@@ -86,15 +88,15 @@ async function searchRealLocations(query) {
       lng: parseFloat(item.lon),
       type: getLocationType(item),
       importance: item.importance || 0
-    })).sort((a, b) => b.importance - a.importance); // 按重要性排序
+    })).sort((a, b) => b.importance - a.importance); // sort by importance
     
   } catch (error) {
-    console.error('地理编码API错误:', error);
+    console.error('Geocoding API error:', error);
     throw error;
   }
 }
 
-// 根据API返回的数据确定位置类型
+// Determine location type based on API data
 function getLocationType(item) {
   const type = item.type || '';
   const classType = item.class || '';
@@ -129,15 +131,15 @@ function displaySearchResults(results, container) {
   
   container.innerHTML = `
     <div class="search-results-header">
-      <h3>搜索结果: "${searchQuery}"</h3>
-      <p>找到 ${results.length} 个结果</p>
+      <h3>Search results: "${searchQuery}"</h3>
+      <p>${results.length} results found</p>
     </div>
     <div class="search-results-list">
       ${results.map((result, index) => `
         <div class="search-result-item" data-index="${index}">
           <h4>${result.name}</h4>
           <p class="result-address">${formatAddress(result.address)}</p>
-          <p class="result-distance">计算距离中...</p>
+          <p class="result-distance">Calculating distance...</p>
         </div>
       `).join('')}
     </div>
@@ -170,7 +172,7 @@ function calculateDistances(results) {
         });
       },
       (error) => {
-        console.log('无法获取用户位置，显示默认距离');
+        console.log('Unable to get user location. Showing default distance');
         // Display default message if location unavailable
         results.forEach((_, index) => {
           displayDistance(null, index);
@@ -226,7 +228,7 @@ function navigateToRouteDetail(result) {
 }
 
 function formatAddress(address) {
-  // 简化地址显示，去掉重复信息
+  // Simplify address display, trim repeated parts
   const parts = address.split(',');
   if (parts.length > 3) {
     return parts.slice(0, 3).join(', ') + '...';

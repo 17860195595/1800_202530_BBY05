@@ -57,9 +57,12 @@ strong {
 }
 
 /* Base font and background */
-html,
-body {
+html {
   height: 100%;
+}
+
+body {
+  min-height: 100%;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
   background-color: #fff;
@@ -67,6 +70,14 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  padding-bottom: 80px; /* Space for fixed footer (approximately 70-80px tall) */
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-bottom: 75px; /* Slightly less on mobile */
+  }
 }
 
 /* Table styles */
