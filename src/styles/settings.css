@@ -6,21 +6,111 @@ body {
 
 .pfp-banner{
     display: flex;
-    
-    
+    flex-direction: column;
 }
 
-.pfp-pic {
+.pfp-pic {  
     display: flex;             
     justify-content: center;   
     width: 100%;    /*so the container of the img is from end to end*/  
-    height: 50%;    
+    height: 50%;
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-bottom: 4px solid #05184d;
 }
 
 .pfp-pic img {
     height: 150px;
+    max-width: 150px;
     border: 4px solid #05184d;
     border-radius: 50%;
+    object-fit: cover;          
+    cursor: pointer;            /* does the clicable popup thingy */
+    transition: 0.3s ease;
 }
+
+.pfp-pic img:hover {
+    opacity: 0.8;
+}
+
+fieldset {          /*all fieldsets*/
+    display: flex;
+    justify-content: center;
+    border: 0;
+    gap: 100px;
+    margin-left: 10%;
+}
+
+.username-banner {
+    display: flex;
+    align-items: center;
+    width: 30%;
+    height: 100px;
+    position: relative;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 20px;
+}
+
+legend {
+    margin-left: 5%;
+    color: #21033f;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30pt;
+    min-width: 0px;
+}
+
+#username {
+    background: rgba(22, 17, 98, 0.542);
+    outline: none;
+    margin-left: 10%;
+    padding: 20px;
+    border-radius: 20px;
+    max-width: 50%;
+    min-width: 0px;
+    box-sizing: border-box;
+}
+
+#username:focus {
+    background: rgba(21, 7, 224, 0.542);
+    color: rgb(0, 0, 0);
+}
+
+
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+.upload-box {
+    width: 200px;
+    height: 200px;
+    border: 2px dashed #764ba2;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    position: relative;
+}
+
+.upload-label {
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#profile-pic {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Hide the input */
+    cursor: pointer;
+}
+
+#preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+    display: none; 
+}
+

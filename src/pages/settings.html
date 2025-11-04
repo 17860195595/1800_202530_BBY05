@@ -4,8 +4,22 @@
         <meta charset="UTF-8">
         <title>settings page</title>
 
+        <!--this is the fonts-->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+
         <!--style sheet-->
         <link rel="stylesheet" href="/src/styles/settings.css" />
+
+        <!--firebase js-->
+        <script type="module" src="/src/firebase/firebaseConfig.js"></script>
+
+        <!--profile upload JS-->
+        <script type="module" src="/src/js/profile.js"></script>
 
         <!--the js module-->
         <script type="module" src="/src/components/components.js"></script>
@@ -18,13 +32,60 @@
         <div class="pfp-banner">
             <!--pfp picture-->
             <div class="pfp-pic">
-                <img src="/src/assets/images/pfp-paceholder.jpg" alt="place holder for pfp">
+                <img id="pfp-image" src="/src/assets/images/pfp-paceholder.jpg" alt="place holder for pfp">
             </div>
+            <!--reset button under the picture-->
+            <button id="reset-pfp">Reset Picture</button>
+            <input type="file" id="upload-pfp" accept="image/*" style="display: none;">
         </div>
 
+        <!--form-->
+        <form>
+            <!--account options banner-->
+            <fieldset class="username-banner-fieldset">
 
+                <div class="username-banner">
+                    <Legend for="username">Name:</Legend>
+                    <input type="text" id="username" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Your Name">
+                </div>
 
-        <!--importen footer-->
+                <div class="username-banner">
+                    <Legend for="username2">placeholder1:</Legend>
+                    <input type="text" id="username2" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
+                </div>
+
+            </fieldset>
+            <br><br><br>
+            <fieldset class="username-banner-fieldset">
+
+                <div class="username-banner">
+                    <Legend for="username3">placeholder2:</Legend>
+                    <input type="text" id="username3" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
+                </div>
+
+                <div class="username-banner">
+                    <Legend for="username4">placeholder3:</Legend>
+                    <input type="text" id="username4" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
+                </div>
+
+            </fieldset>
+            <br><br><br>
+            <fieldset class="username-banner-fieldset">
+
+                <div class="username-banner">
+                    <Legend for="username5">placeholder4:</Legend>
+                    <input type="text" id="username5" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
+                </div>
+
+                <div class="username-banner">
+                    <Legend for="username6">placeholder5:</Legend>
+                    <input type="text" id="username6" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
+                </div>
+
+            </fieldset>
+
+        </form>
+        <!--imported footer-->
         <app-footer></app-footer>
     </body>
 </html>
