@@ -46,6 +46,36 @@
         </button>
       </div>
     </div>
+    
+    <!-- Traffic Detail Modal -->
+    <div class="traffic-detail-modal" id="trafficDetailModal">
+      <div class="traffic-detail-content">
+        <div class="traffic-detail-header">
+          <h3>Traffic Details</h3>
+          <button class="traffic-close-btn" id="trafficCloseBtn">&times;</button>
+        </div>
+        <div class="traffic-detail-body">
+          <!-- 用户报告信息 -->
+          <div class="traffic-status-item">
+            <span class="traffic-label">User:</span>
+            <span class="traffic-value" id="trafficReporterName">-</span>
+          </div>
+          <div class="traffic-status-item">
+            <span class="traffic-label">Type:</span>
+            <span class="traffic-value" id="trafficReportType">-</span>
+          </div>
+          <div class="traffic-status-item">
+            <span class="traffic-label">Comment:</span>
+            <span class="traffic-value" id="trafficReportComment">-</span>
+          </div>
+          <div class="traffic-status-item">
+            <span class="traffic-label">Published:</span>
+            <span class="traffic-value" id="trafficReportTime">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- footer -->
     <app-footer></app-footer>
     <script type="module">
