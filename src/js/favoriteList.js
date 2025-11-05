@@ -22,7 +22,7 @@ async function loadFavoriteRoutes() {
   
   try {
     const favoriteRoutes = await listFavoritesDesc();
-    
+    //empty state
     if (favoriteRoutes.length === 0) {
       container.innerHTML = `
         <div class="empty-favorites">
@@ -35,7 +35,7 @@ async function loadFavoriteRoutes() {
       `;
       return;
     }
-    
+    // Render favorite routes
     const routesHTML = favoriteRoutes.map((route) => `
       <div class="favorite-route-item">
         <div class="route-info">
@@ -77,4 +77,4 @@ async function loadFavoriteRoutes() {
   }
 }
 
-// 事件在渲染后绑定，不再使用全局函数
+
