@@ -1,14 +1,14 @@
 // favoritesService.js - Firestore favorites CRUD
 import { db } from './firebaseConfig.js';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, orderBy } from 'firebase/firestore';
-
+// Firestore collection name
 const COLLECTION = 'favorites';
-
+// Helper to build a unique key for each favorite based on lat/lng
 export function buildDestinationKey(lat, lng) {
   if (typeof lat !== 'number' || typeof lng !== 'number') return '';
   return `${Number(lat).toFixed(5)},${Number(lng).toFixed(5)}`;
 }
-
+// Check if a favorite exists by lat/lng
 export async function isFavorite(lat, lng) {
   if (!db) return false;
   const key = buildDestinationKey(lat, lng);
@@ -17,13 +17,13 @@ export async function isFavorite(lat, lng) {
   const snap = await getDocs(q);
   return !snap.empty;
 }
-
+// Add a new favorite
 export async function addFavorite(favoritePayload) {
   if (!db) throw new Error('DB not available');
   const ref = collection(db, COLLECTION);
   return await addDoc(ref, favoritePayload);
 }
-
+// Remove a favorite by lat/lng
 export async function removeFavoriteByKey(lat, lng) {
   if (!db) return;
   const key = buildDestinationKey(lat, lng);
@@ -34,7 +34,7 @@ export async function removeFavoriteByKey(lat, lng) {
   snap.forEach(d => tasks.push(deleteDoc(doc(db, COLLECTION, d.id))));
   await Promise.all(tasks);
 }
-
+// List all favorites ordered by savedAt descending
 export async function listFavoritesDesc() {
   if (!db) return [];
   const ref = collection(db, COLLECTION);

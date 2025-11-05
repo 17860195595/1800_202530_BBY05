@@ -996,7 +996,7 @@ async function saveRoute() {
 
   const key = buildDestinationKey(currentRouteData.lat, currentRouteData.lng);
 
-  // 已存在 -> 删除（取消收藏）
+  // check if already favorite
   if (await isFavorite(currentRouteData.lat, currentRouteData.lng)) {
     await removeFavoriteByKey(currentRouteData.lat, currentRouteData.lng);
     updateSaveButtonUI(false, true);
@@ -1006,7 +1006,7 @@ async function saveRoute() {
     return;
   }
 
-  // 新增收藏
+ // add new favorite
   const fav = createFavoriteRouteObject();
   const payload = {
     ...fav,
@@ -1021,18 +1021,18 @@ async function saveRoute() {
 }
 
 /**
- * 获取收藏列表
+ * obtain favorite routes from localStorage
  */
 function getFavoriteRoutes() {
-  // 兼容旧逻辑：不再使用，但保留避免报错
+  
   return JSON.parse(localStorage.getItem('favoriteRoutes') || '[]');
 }
 
 /**
- * 保存收藏列表
+ * save favorite routes to database
+ * @param {Array} routes - favorite routes array
  */
 function saveFavoriteRoutes(routes) {
-  // 兼容旧逻辑：不再使用
   localStorage.setItem('favoriteRoutes', JSON.stringify(routes));
 }
 
