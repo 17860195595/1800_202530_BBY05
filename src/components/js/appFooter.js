@@ -95,6 +95,8 @@ export class AppFooter extends HTMLElement {
       activeRoute = 'search';
     } else if (currentPath.includes('search.html')) {
       activeRoute = 'search';
+    } else if (currentPath.includes('trafficComments.html')) {
+      activeRoute = 'traffic';
     }
     
     // Update active state
@@ -130,7 +132,7 @@ export class AppFooter extends HTMLElement {
     } else if (route === 'search') {
       window.location.href = getPagesPath('main.html');
     } else if (route === 'traffic') {
-      window.location.href = getPagesPath('main.html');
+      window.location.href = getPagesPath('trafficComments.html');
     } else if (route === 'settings') {
       console.log('Settings page not implemented yet');
     }
