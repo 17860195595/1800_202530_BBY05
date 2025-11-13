@@ -38,52 +38,49 @@
             <button id="reset-pfp">Reset Picture</button>
             <input type="file" id="upload-pfp" accept="image/*" style="display: none;">
         </div>
-
+        <br>
         <!--form-->
         <form>
             <!--account options banner-->
-            <fieldset class="username-banner-fieldset">
+            <fieldset class="fieldset-containers">
 
-                <div class="username-banner">
-                    <Legend for="username">Name:</Legend>
-                    <input type="text" id="username" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Your Name">
+                <div class="fieldset-banner">
+                    <div class ="fieldset-legend">
+                        <Legend for="name">Name:</Legend>
+                    </div>
+                    <div class="input-container">
+                        <input type="text" id="name" pattern="[A-Za-z]{8,20}" placeholder="Your Name">
+                    </div>
+
                 </div>
-
-                <div class="username-banner">
-                    <Legend for="username2">placeholder1:</Legend>
-                    <input type="text" id="username2" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
-                </div>
-
             </fieldset>
-            <br><br><br>
-            <fieldset class="username-banner-fieldset">
+            <br><br>
+            <fieldset class="fieldset-containers">
 
-                <div class="username-banner">
-                    <Legend for="username3">placeholder2:</Legend>
-                    <input type="text" id="username3" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
+                <div class="fieldset-banner">
+                    <div class ="fieldset-legend">
+                        <Legend for="name">Last Name:</Legend>
+                    </div>
+                    <div class="input-container">
+                        <input type="text" id="lastname" pattern="[A-Za-z]{8,20}" placeholder="Your last name">
+                    </div>
+
                 </div>
-
-                <div class="username-banner">
-                    <Legend for="username4">placeholder3:</Legend>
-                    <input type="text" id="username4" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
-                </div>
-
             </fieldset>
-            <br><br><br>
-            <fieldset class="username-banner-fieldset">
+            <br><br>
+            <fieldset class="fieldset-containers">
 
-                <div class="username-banner">
-                    <Legend for="username5">placeholder4:</Legend>
-                    <input type="text" id="username5" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
+                <div class="fieldset-banner">
+                    <div class ="fieldset-legend">
+                        <Legend for="name">Username:</Legend>
+                    </div>
+                    <div class="input-container">
+                        <input type="text" id="username" pattern="[A-Za-z]{8,20}" placeholder="Your username">
+                    </div>
+
                 </div>
-
-                <div class="username-banner">
-                    <Legend for="username6">placeholder5:</Legend>
-                    <input type="text" id="username6" class="username-input" pattern="[A-Za-z]{8,20}" placeholder="Username">
-                </div>
-
             </fieldset>
-
+            
         </form>
         <!--imported footer-->
         <app-footer></app-footer>

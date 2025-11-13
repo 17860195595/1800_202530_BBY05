@@ -1,7 +1,6 @@
 body {
     display: flex;
     flex-direction: column;
-    gap: 20px;
 }
 
 .pfp-banner{
@@ -14,13 +13,15 @@ body {
     justify-content: center;   
     width: 100%;    /*so the container of the img is from end to end*/  
     height: 50%;
+    padding: 20px;
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-bottom: 4px solid #05184d;
+    border-top: 4px solid #05184d;
 }
 
 .pfp-pic img {
-    height: 150px;
-    max-width: 150px;
+    height: 230px;
+    max-width: 230px;
     border: 4px solid #05184d;
     border-radius: 50%;
     object-fit: cover;          
@@ -31,49 +32,107 @@ body {
 .pfp-pic img:hover {
     opacity: 0.8;
 }
+/*-----------------------------------------------------------------------------------------*/
 
 fieldset {          /*all fieldsets*/
     display: flex;
     justify-content: center;
     border: 0;
-    gap: 100px;
-    margin-left: 10%;
 }
 
-.username-banner {
+.fieldset-banner {
     display: flex;
     align-items: center;
-    width: 30%;
+    justify-content: space-between;
+    width: 90%;
     height: 100px;
-    position: relative;
     background: linear-gradient(135deg, #667eea, #764ba2);
+    outline: auto;
+    border-radius: 20px;
+    gap: 20px;
+    border: 5px solid #000000;
+}
+
+.fieldset-legend { 
+    background: rgb(136, 177, 214);
+    font-family: Arial, Helvetica, sans-serif;
+    min-width: fit-content; /*so text doesent stack*/
+    max-height: 90%;
+    text-align: center;
+    padding: 20px;
+    margin-left: 250px;
+    border-radius: 20px;
+    border: 5px solid #000000;
+}
+
+.input-container {
+   background: rgb(136, 177, 214);
+   width: 50%;
+   margin-right: 150px;
+   border-radius: 20px;
+   color: rgb(0, 0, 0);
+   border: 5px solid #000000;
+}
+
+#name {
+    padding: 20px;
+    width: 100%;
     border-radius: 20px;
 }
 
-legend {
-    margin-left: 5%;
-    color: #21033f;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 30pt;
-    min-width: 0px;
+#name:focus {
+    background: rgba(160, 155, 226, 0.542);
+    color: rgb(0, 0, 0);
+    font-size: 20px;
+    border-radius: 20px;
+    
+}
+
+#name::placeholder {
+    color: rgb(0, 0, 0);       
+    font-size: 20px;
+    font-style: italic;
+}
+
+#lastname {
+    padding: 20px;
+    width: 100%;
+    border-radius: 20px;
+}
+
+#lastname:focus {
+    background: rgba(160, 155, 226, 0.542);
+    color: rgb(0, 0, 0);
+    font-size: 20px;
+    border-radius: 20px;
+    
+}
+
+#lastname::placeholder {
+    color: rgb(0, 0, 0);       
+    font-size: 20px;
+    font-style: italic;
 }
 
 #username {
-    background: rgba(22, 17, 98, 0.542);
-    outline: none;
-    margin-left: 10%;
     padding: 20px;
+    width: 100%;
     border-radius: 20px;
-    max-width: 50%;
-    min-width: 0px;
-    box-sizing: border-box;
 }
 
 #username:focus {
-    background: rgba(21, 7, 224, 0.542);
+    background: rgba(160, 155, 226, 0.542);
     color: rgb(0, 0, 0);
+    font-size: 20px;
+    border-radius: 20px;
+    
 }
 
+#username::placeholder {
+    color: rgb(0, 0, 0);       
+    font-size: 20px;
+    font-style: italic;
+}
 
 
 /*---------------------------------------------------------------------------------------------------------------------*/
