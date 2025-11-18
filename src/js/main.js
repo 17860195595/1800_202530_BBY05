@@ -4,11 +4,34 @@
 // Import Firebase and traffic service
 import { db } from './firebaseConfig.js';
 import { fetchReportsWithinBounds } from './trafficService.js';
+import { collection, getDocs } from 'firebase/firestore';
+import { normalizeTimestamp } from './trafficService.js';
 
 let map; // Declare map as global variable for search functionality
 let trafficMarkers = []; // Store traffic markers for cleanup
+let currentUserLocation = null; // Store current user location
+let currentRadiusKm = 5; // Current radius filter in kilometers
 
 function initMap() {
+  // Check if map container exists
+  const mapContainer = document.getElementById("map");
+  if (!mapContainer) {
+    console.error("Map container #map not found!");
+    return;
+  }
+  
+  // Check if map is already initialized
+  if (map) {
+    console.warn("Map already initialized, skipping...");
+    return;
+  }
+  
+  // Check if Leaflet is available
+  if (typeof L === 'undefined' || !L.map) {
+    console.error("Leaflet library not loaded!");
+    return;
+  }
+  
   // Create custom icons
   const userIcon = L.divIcon({
     className: 'user-location-marker',
@@ -35,13 +58,31 @@ function initMap() {
   });
 
   // Initialize map
-  map = L.map("map").setView([49.2827, -123.1207], 12);
+  try {
+    map = L.map("map", {
+      preferCanvas: false
+    }).setView([49.2827, -123.1207], 12);
+    
+    // Ensure map container has proper dimensions
+    mapContainer.style.height = mapContainer.style.height || "500px";
+    mapContainer.style.width = mapContainer.style.width || "100%";
+    
+    // Force map to invalidate size after a short delay
+    setTimeout(() => {
+      if (map) {
+        map.invalidateSize();
+      }
+    }, 100);
 
-  // Add OpenStreetMap layer
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
+    // Add OpenStreetMap layer
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+  } catch (error) {
+    console.error("Failed to initialize map:", error);
+    return;
+  }
 
   // Add dark map layer option (optional)
   const darkLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
@@ -58,6 +99,9 @@ function initMap() {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         
+        // Store user location for traffic jam alert
+        currentUserLocation = { lat, lng };
+        
         map.setView([lat, lng], 14);
         
         // Add user location marker
@@ -67,6 +111,9 @@ function initMap() {
           .openPopup();
         
         userLocationAdded = true;
+        
+        // Load nearby traffic jams with current radius
+        loadNearbyTrafficJams(lat, lng, currentRadiusKm);
       },
       function (err) {
         console.warn("Location failed:", err.message);
@@ -185,12 +232,30 @@ function handleSearch(query) {
 
     // Initialize map when page loads
     document.addEventListener("DOMContentLoaded", function() {
-      // Wait a bit for Leaflet to be fully loaded if needed
-      if (typeof L !== 'undefined') {
-        initMap();
-      } else {
-        setTimeout(initMap, 100);
+      // Ensure map container exists
+      const mapContainer = document.getElementById("map");
+      if (!mapContainer) {
+        console.error("Map container not found!");
+        return;
       }
+      
+      // Wait for Leaflet to be fully loaded
+      function tryInitMap() {
+        if (typeof L !== 'undefined' && L.map) {
+          try {
+            initMap();
+          } catch (error) {
+            console.error("Error initializing map:", error);
+            // Retry after a short delay
+            setTimeout(tryInitMap, 200);
+          }
+        } else {
+          // Retry if Leaflet not loaded yet
+          setTimeout(tryInitMap, 100);
+        }
+      }
+      
+      tryInitMap();
 
       // Initialize report button functionality
       setTimeout(() => {
@@ -212,6 +277,43 @@ function handleSearch(query) {
           });
         }
       }, 500);
+      
+      // Try to get location for traffic jam alert if not already obtained
+      if (!currentUserLocation && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            currentUserLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            loadNearbyTrafficJams(currentUserLocation.lat, currentUserLocation.lng, currentRadiusKm);
+          },
+          (error) => {
+            console.warn('Failed to get location for traffic jam alert:', error);
+            showTrafficJamError('Unable to get your location');
+          }
+        );
+      }
+      
+      // Setup distance filter event listener
+      const distanceFilter = document.getElementById('distanceFilter');
+      if (distanceFilter) {
+        distanceFilter.addEventListener('change', (e) => {
+          const selectedRadius = parseInt(e.target.value);
+          currentRadiusKm = selectedRadius;
+          
+          // Update subtitle
+          const subtitle = document.getElementById('trafficJamSubtitle');
+          if (subtitle) {
+            subtitle.textContent = `Within ${selectedRadius}km radius`;
+          }
+          
+          // Reload traffic jams with new radius
+          if (currentUserLocation) {
+            loadNearbyTrafficJams(currentUserLocation.lat, currentUserLocation.lng, selectedRadius);
+          }
+        });
+      }
     });
 
 // ==============================================
@@ -494,35 +596,6 @@ function mapReportTypeToLabel(type) {
 }
 
 /**
- * Normalize timestamp to milliseconds
- * @param {any} input - Timestamp input (various formats)
- * @returns {number|null} Timestamp in milliseconds
- */
-function normalizeTimestamp(input) {
-  if (!input) return null;
-  try {
-    // Firebase Timestamp 对象
-    if (typeof input === 'object') {
-      if (typeof input.toDate === 'function') {
-        return input.toDate().getTime();
-      }
-      if (typeof input.seconds === 'number') {
-        return (input.seconds * 1000) + Math.floor((input.nanoseconds || 0) / 1e6);
-      }
-    }
-    // 数字：可能是秒或毫秒
-    if (typeof input === 'number') {
-      return input < 1e12 ? input * 1000 : input;
-    }
-    // Date 或可解析字符串
-    const parsed = (input instanceof Date) ? input.getTime() : new Date(input).getTime();
-    return Number.isNaN(parsed) ? null : parsed;
-  } catch (_e) {
-    return null;
-  }
-}
-
-/**
  * Format time ago string
  * @param {any} input - Timestamp input
  * @returns {string} Formatted time ago string
@@ -562,4 +635,260 @@ function setupTrafficModal() {
       }
     });
   }
+}
+
+// ==============================================
+// Nearby Traffic Jam Alert (5km radius)
+// ==============================================
+
+/**
+ * Calculate distance between two coordinates in kilometers
+ * @param {number} lat1 - Latitude of first point
+ * @param {number} lon1 - Longitude of first point
+ * @param {number} lat2 - Latitude of second point
+ * @param {number} lon2 - Longitude of second point
+ * @returns {number} Distance in kilometers
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+/**
+ * Load traffic jams within specified radius of user location
+ * @param {number} userLat - User latitude
+ * @param {number} userLng - User longitude
+ * @param {number} radiusKm - Radius in kilometers (default: 5)
+ */
+async function loadNearbyTrafficJams(userLat, userLng, radiusKm = 5) {
+  if (!db) {
+    console.warn('Firestore not available for traffic jam alert');
+    showTrafficJamError('Database unavailable');
+    return;
+  }
+
+  try {
+    // Show loading state
+    showTrafficJamLoading();
+
+    // Get all traffic reports (we'll filter by distance)
+    const trafficReportsRef = collection(db, 'trafficReports');
+    const snapshot = await getDocs(trafficReportsRef);
+    
+    const now = Date.now();
+    const maxAgeMs = 24 * 60 * 60 * 1000; // 24 hours
+    
+    const nearbyReports = [];
+    
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (typeof data.lat !== 'number' || typeof data.lng !== 'number') return;
+      
+      // Calculate distance
+      const distance = calculateDistance(userLat, userLng, data.lat, data.lng);
+      if (distance > radiusKm) return;
+      
+      // Check if report is recent (within 24 hours)
+      const createdAt = normalizeTimestamp(data.createAt || data.timestamp);
+      if (createdAt && now - createdAt > maxAgeMs) return;
+      
+      nearbyReports.push({
+        id: doc.id,
+        lat: data.lat,
+        lng: data.lng,
+        username: data.username || 'Anonymous',
+        type: data.type || 'traffic',
+        comment: data.comment || '',
+        createdAt: createdAt || now,
+        distance: distance
+      });
+    });
+    
+    // Sort by distance (closest first)
+    nearbyReports.sort((a, b) => a.distance - b.distance);
+    
+    // Display results
+    displayTrafficJamAlert(nearbyReports);
+    
+  } catch (error) {
+    console.error('Failed to load nearby traffic jams:', error);
+    showTrafficJamError('Failed to load. Please try again later.');
+  }
+}
+
+/**
+ * Show loading state in traffic jam alert
+ */
+function showTrafficJamLoading() {
+  const content = document.getElementById('trafficJamContent');
+  if (content) {
+    content.innerHTML = `
+      <div class="traffic-jam-loading">
+        <div class="loading-spinner"></div>
+        <p>Loading nearby traffic information...</p>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Show error state in traffic jam alert
+ * @param {string} message - Error message
+ */
+function showTrafficJamError(message) {
+  const content = document.getElementById('trafficJamContent');
+  const countEl = document.getElementById('trafficJamCount');
+  
+  if (content) {
+    content.innerHTML = `
+      <div class="traffic-jam-error">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <p>${message}</p>
+      </div>
+    `;
+  }
+  
+  if (countEl) {
+    countEl.querySelector('.count-number').textContent = '0';
+  }
+}
+
+/**
+ * Display traffic jam alert with nearby reports
+ * @param {Array} reports - Array of nearby traffic reports
+ */
+function displayTrafficJamAlert(reports) {
+  const content = document.getElementById('trafficJamContent');
+  const countEl = document.getElementById('trafficJamCount');
+  const alertEl = document.getElementById('trafficJamAlert');
+  
+  if (!content || !countEl || !alertEl) return;
+  
+  const count = reports.length;
+  const countNumber = countEl.querySelector('.count-number');
+  if (countNumber) {
+    countNumber.textContent = count;
+  }
+  
+  // Update alert class based on count
+  alertEl.classList.remove('traffic-jam-low', 'traffic-jam-medium', 'traffic-jam-high');
+  if (count === 0) {
+    alertEl.classList.add('traffic-jam-low');
+    content.innerHTML = `
+      <div class="traffic-jam-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 11l3 3L22 4"></path>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+        </svg>
+        <p>No traffic reports nearby</p>
+        <p class="traffic-jam-empty-sub">All clear!</p>
+      </div>
+    `;
+  } else if (count <= 3) {
+    alertEl.classList.add('traffic-jam-medium');
+  } else {
+    alertEl.classList.add('traffic-jam-high');
+  }
+  
+  if (count > 0) {
+    // Show top 5 closest reports
+    const topReports = reports.slice(0, 5);
+    const reportsHTML = topReports.map(report => {
+      const typeLabels = {
+        'accident': 'Accident',
+        'traffic': 'Traffic',
+        'roadblock': 'Roadblock',
+        'unknown': 'Other'
+      };
+      const typeColors = {
+        'accident': '#ff4444',
+        'traffic': '#ff8800',
+        'roadblock': '#ff6600',
+        'unknown': '#999999'
+      };
+      
+      const typeLabel = typeLabels[report.type] || report.type;
+      const typeColor = typeColors[report.type] || '#999999';
+      const timeAgo = formatTimeAgo(report.createdAt);
+      const username = escapeHtml(report.username || 'Anonymous');
+      
+      return `
+        <div class="traffic-jam-item" data-report-id="${report.id}">
+          <div class="traffic-jam-item-icon" style="background-color: ${typeColor}20; border-color: ${typeColor};">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${typeColor}" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+          <div class="traffic-jam-item-content">
+            <div class="traffic-jam-item-header">
+              <span class="traffic-jam-item-type" style="color: ${typeColor};">${typeLabel}</span>
+              <span class="traffic-jam-item-distance">${report.distance.toFixed(1)}km</span>
+            </div>
+            <div class="traffic-jam-item-user">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>${username}</span>
+            </div>
+            <p class="traffic-jam-item-comment">${escapeHtml(report.comment || 'No details provided')}</p>
+            <div class="traffic-jam-item-footer">
+              <span class="traffic-jam-item-time">${timeAgo}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    content.innerHTML = `
+      <div class="traffic-jam-list">
+        ${reportsHTML}
+      </div>
+      ${count > 5 ? `<div class="traffic-jam-more">${count - 5} more reports on the map</div>` : ''}
+    `;
+    
+    // Add click handlers to items
+    content.querySelectorAll('.traffic-jam-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const reportId = item.getAttribute('data-report-id');
+        const report = reports.find(r => r.id === reportId);
+        if (report && map) {
+          // Center map on the report location
+          map.setView([report.lat, report.lng], 15);
+          // Find and trigger the marker click if it exists
+          const marker = trafficMarkers.find(m => {
+            const pos = m.getLatLng();
+            return Math.abs(pos.lat - report.lat) < 0.0001 && 
+                   Math.abs(pos.lng - report.lng) < 0.0001;
+          });
+          if (marker) {
+            marker.openPopup();
+          }
+        }
+      });
+    });
+  }
+}
+
+/**
+ * Escape HTML to prevent XSS
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped HTML
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }

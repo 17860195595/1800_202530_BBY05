@@ -34,6 +34,46 @@
     <div class="container main-container">
       <h1 id="welcomeTitle"></h1>
       <app-search-bar></app-search-bar>
+      
+      <!-- Traffic Jam Alert Block -->
+      <div id="trafficJamAlert" class="traffic-jam-alert">
+        <div class="traffic-jam-header">
+          <div class="traffic-jam-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <div class="traffic-jam-title">
+            <h2>Nearby Traffic Alerts</h2>
+            <div class="traffic-jam-subtitle-wrapper">
+              <p class="traffic-jam-subtitle" id="trafficJamSubtitle">Within 5km radius</p>
+              <div class="traffic-jam-distance-filter">
+                <label for="distanceFilter" class="filter-label">Distance:</label>
+                <select id="distanceFilter" class="distance-select">
+                  <option value="1">1 km</option>
+                  <option value="3">3 km</option>
+                  <option value="5" selected>5 km</option>
+                  <option value="10">10 km</option>
+                  <option value="20">20 km</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="traffic-jam-count" id="trafficJamCount">
+            <span class="count-number">0</span>
+            <span class="count-label">reports</span>
+          </div>
+        </div>
+        <div class="traffic-jam-content" id="trafficJamContent">
+          <div class="traffic-jam-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading nearby traffic information...</p>
+          </div>
+        </div>
+      </div>
+      
       <div id="map"></div>
       
       <!-- Report Button -->

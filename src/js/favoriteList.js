@@ -19,9 +19,23 @@ function escapeHtml(text) {
 
 async function loadFavoriteRoutes() {
   const container = document.getElementById('favoriteRoutes');
+  const loadingEl = document.getElementById('favoritesLoading');
+  
+  // Show loading state
+  if (loadingEl) {
+    loadingEl.style.display = 'flex';
+  }
   
   try {
+    // Add a small delay to show loading state (optional, for better UX)
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     const favoriteRoutes = await listFavoritesDesc();
+    
+    // Hide loading state
+    if (loadingEl) {
+      loadingEl.style.display = 'none';
+    }
     //empty state
     if (favoriteRoutes.length === 0) {
       container.innerHTML = `
@@ -73,7 +87,14 @@ async function loadFavoriteRoutes() {
     });
   } catch (e) {
     console.error('Failed to load favorites from Firestore:', e);
-    container.innerHTML = '<div class="empty-favorites"><h3>Failed to load favorites</h3></div>';
+    
+    // Hide loading state
+    const loadingEl = document.getElementById('favoritesLoading');
+    if (loadingEl) {
+      loadingEl.style.display = 'none';
+    }
+    
+    container.innerHTML = '<div class="empty-favorites"><h3>Failed to load favorites</h3><p>Please try again later.</p></div>';
   }
 }
 
