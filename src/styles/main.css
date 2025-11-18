@@ -615,6 +615,14 @@ body {
   box-shadow: 0 4px 12px rgba(255, 68, 68, 0.4);
   animation: iconPulse 2s ease-in-out infinite;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+/* Green icon when no reports */
+.traffic-jam-alert.traffic-jam-low .traffic-jam-icon {
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  animation: iconPulseGreen 2s ease-in-out infinite;
 }
 
 @keyframes iconPulse {
@@ -625,6 +633,17 @@ body {
   50% {
     transform: scale(1.05);
     box-shadow: 0 6px 16px rgba(255, 68, 68, 0.6);
+  }
+}
+
+@keyframes iconPulseGreen {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.6);
   }
 }
 
