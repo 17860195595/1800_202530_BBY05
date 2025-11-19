@@ -10,16 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentUser = null;
 
-  // Username fields mapping
-  const fields = [
-    { id: "username", collection: "username" },
-    { id: "username2", collection: "placeholder1" },
-    { id: "username3", collection: "placeholder2" },
-    { id: "username4", collection: "placeholder3" },
-    { id: "username5", collection: "placeholder4" },
-    { id: "username6", collection: "placeholder5" },
-  ];
-
   // make it so user has to be logged in to change pfp
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
@@ -36,30 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error loading profile picture:", err);
     }
 
-    // loads username fields 
-    fields.forEach(({ id, collection }) => {
-      const input = document.getElementById(id);
-      const docRef = doc(db, collection, user.uid);
-
-      (async () => {
-        try {
-          const snap = await getDoc(docRef);
-          if (snap.exists() && snap.data().value) {
-            input.value = snap.data().value;
-          }
-        } catch (err) {
-          console.error(`Error loading ${id}:`, err);
-        }
-      })();
-
-      input.addEventListener("change", async () => {
-        try {
-          await setDoc(docRef, { value: input.value }, { merge: true });
-        } catch (err) {
-          console.error(`Error saving ${id}:`, err);
-        }
-      });
-    });
   });
 
   // listner for picking new pfp

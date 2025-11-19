@@ -16,10 +16,13 @@
         <link rel="stylesheet" href="/src/styles/settings.css" />
 
         <!--firebase js-->
-        <script type="module" src="/src/firebase/firebaseConfig.js"></script>
+        
 
         <!--profile upload JS-->
         <script type="module" src="/src/js/profile.js"></script>
+
+        <!--credentials upload js-->
+        <script type="module" src="/src/js/settings.js"></script>
 
         <!--the js module-->
         <script type="module" src="/src/components/components.js"></script>
@@ -32,6 +35,14 @@
         <div class="pfp-banner">
             <!--pfp picture-->
             <div class="pfp-pic">
+                <div class="show-cred-container">
+                <h1>Current user info</h1>
+                <p>name placeholder</p>
+                <p>lastname placeholder</p>
+                <p>username placeholder</p>
+                <div id="creds-go-here" class="creds">
+                </div>
+            </div>
                 <img id="pfp-image" src="/src/assets/images/pfp-paceholder.jpg" alt="place holder for pfp">
             </div>
             <!--reset button under the picture-->
@@ -40,16 +51,17 @@
         </div>
         <br>
         <!--form-->
-        <form>
+        <form id="myForm">
             <!--account options banner-->
             <fieldset class="fieldset-containers">
 
                 <div class="fieldset-banner">
                     <div class ="fieldset-legend">
-                        <Legend for="name">Name:</Legend>
+                        <legend for="name">Name:</legend>
                     </div>
                     <div class="input-container">
-                        <input type="text" id="name" pattern="[A-Za-z]{8,20}" placeholder="Your Name">
+                        <input name="name" type="text" id="name" pattern="[A-Za-z]{1,20}" placeholder="Your Name">
+                        <button type="submit" id="submit-button-name">Submit</button>
                     </div>
 
                 </div>
@@ -59,10 +71,11 @@
 
                 <div class="fieldset-banner">
                     <div class ="fieldset-legend">
-                        <Legend for="name">Last Name:</Legend>
+                        <legend for="name">Last Name:</legend>
                     </div>
                     <div class="input-container">
-                        <input type="text" id="lastname" pattern="[A-Za-z]{8,20}" placeholder="Your last name">
+                        <input name="lastname" type="text" id="lastname" pattern="[A-Za-z]{1,20}" placeholder="Your last name">
+                        <button type="submit" id="submit-button-lastname">Submit</button>
                     </div>
 
                 </div>
@@ -72,10 +85,11 @@
 
                 <div class="fieldset-banner">
                     <div class ="fieldset-legend">
-                        <Legend for="name">Username:</Legend>
+                        <legend for="name">Username:</legend>
                     </div>
                     <div class="input-container">
-                        <input type="text" id="username" pattern="[A-Za-z]{8,20}" placeholder="Your username">
+                        <input name="username" type="text" id="username" pattern="[A-Za-z]{1,20}" placeholder="Your username">
+                        <button type="submit" id="submit-button-username">Submit</button>
                     </div>
 
                 </div>

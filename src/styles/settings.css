@@ -13,6 +13,7 @@ body {
     justify-content: center;   
     width: 100%;    /*so the container of the img is from end to end*/  
     height: 50%;
+    
     padding: 20px;
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-bottom: 4px solid #05184d;
@@ -31,6 +32,22 @@ body {
 
 .pfp-pic img:hover {
     opacity: 0.8;
+}
+/*-----------------------------------------------------------------------------------------*/
+/*credits*/
+.show-cred-container{
+    position: absolute; /* absolute = ignores others kinda*/
+    left: 125px;
+
+    border: 2px solid #0ff; 
+  box-shadow:
+    0 0 5px #0ff,
+    0 0 10px #0ff,
+    0 0 20px #0ff,
+    0 0 40px #0ff;
+  padding: 20px;
+  border-radius: 10px; 
+ 
 }
 /*-----------------------------------------------------------------------------------------*/
 
@@ -53,6 +70,7 @@ fieldset {          /*all fieldsets*/
     border: 5px solid #000000;
 }
 
+
 .fieldset-legend { 
     background: rgb(136, 177, 214);
     font-family: Arial, Helvetica, sans-serif;
@@ -66,6 +84,7 @@ fieldset {          /*all fieldsets*/
 }
 
 .input-container {
+   display: flex;
    background: rgb(136, 177, 214);
    width: 50%;
    margin-right: 150px;
@@ -94,6 +113,16 @@ fieldset {          /*all fieldsets*/
     font-style: italic;
 }
 
+#submit-button-name {
+    background: rgb(103, 146, 183);
+    font-family: Arial, Helvetica, sans-serif;
+    color: #030613;
+    margin-right: 0px;
+    border-radius: 20px;
+    border: 5px solid #000000;
+
+}
+
 #lastname {
     padding: 20px;
     width: 100%;
@@ -112,6 +141,16 @@ fieldset {          /*all fieldsets*/
     color: rgb(0, 0, 0);       
     font-size: 20px;
     font-style: italic;
+}
+
+#submit-button-lastname {
+    background: rgb(103, 146, 183);
+    font-family: Arial, Helvetica, sans-serif;
+    color: #030613;
+    margin-right: 0px;
+    border-radius: 20px;
+    border: 5px solid #000000;
+
 }
 
 #username {
@@ -134,6 +173,15 @@ fieldset {          /*all fieldsets*/
     font-style: italic;
 }
 
+#submit-button-username {
+    background: rgb(103, 146, 183);
+    font-family: Arial, Helvetica, sans-serif;
+    color: #030613;
+    margin-right: 0px;
+    border-radius: 20px;
+    border: 5px solid #000000;
+
+}
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 .upload-box {
