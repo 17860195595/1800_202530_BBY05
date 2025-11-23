@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Favorite Routes - ClearWay</title>
     <link rel="stylesheet" href="/src/styles/favoriteList.css" />
     <script type="module" src="/src/components/components.js"></script>
     <script type="module" src="/src/js/favoriteList.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <app-page-header title="Favorite Routes"></app-page-header>
-    
+    <br />
+    <h3 class="Save-Header">Save A Route</h3>
+    <br />
+    <app-search-bar></app-search-bar>
     <div class="favorite-list-container">
-        <div class="favorite-list-header">
-            <h2>My Favorite Routes</h2>
+      <div class="favorite-list-header">
+        <h2>My Favorite Routes</h2>
+      </div>
+
+      <div id="favoriteRoutes" class="favorite-routes-list">
+        <!-- Loading state -->
+        <div class="favorites-loading" id="favoritesLoading">
+          <div class="loading-spinner"></div>
+          <p>Loading your favorite routes...</p>
         </div>
-        
-        <div id="favoriteRoutes" class="favorite-routes-list">
-            <!-- Loading state -->
-            <div class="favorites-loading" id="favoritesLoading">
-                <div class="loading-spinner"></div>
-                <p>Loading your favorite routes...</p>
-            </div>
-        </div>
+      </div>
     </div>
-    
+
     <app-footer></app-footer>
-</body>
+  </body>
 </html>
