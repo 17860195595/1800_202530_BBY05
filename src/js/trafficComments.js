@@ -2,6 +2,8 @@
 import { db } from './firebaseConfig.js';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { normalizeTimestamp } from './trafficService.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 let allReports = [];
 let filteredReports = [];
@@ -93,34 +95,39 @@ function setupEventListeners() {
         });
     });
     
-    // Custom date inputs
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
+    // Initialize flatpickr for date inputs with English locale
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     
-    startDateInput.addEventListener('change', () => {
-        validateCustomDateRange();
-        applyFilters();
+    const startDatePicker = flatpickr('#startDate', {
+        dateFormat: 'Y-m-d',
+        maxDate: maxDate,
+        allowInput: false,
+        clickOpens: true,
+        onChange: function(selectedDates, dateStr, instance) {
+            if (dateStr) {
+                validateCustomDateRange();
+                applyFilters();
+            }
+        }
     });
     
-    endDateInput.addEventListener('change', () => {
-        validateCustomDateRange();
-        applyFilters();
+    const endDatePicker = flatpickr('#endDate', {
+        dateFormat: 'Y-m-d',
+        maxDate: maxDate,
+        allowInput: false,
+        clickOpens: true,
+        onChange: function(selectedDates, dateStr, instance) {
+            if (dateStr) {
+                validateCustomDateRange();
+                applyFilters();
+            }
+        }
     });
     
-    // Set max date to today
-    const today = new Date().toISOString().split('T')[0];
-    startDateInput.setAttribute('max', today);
-    endDateInput.setAttribute('max', today);
-    
-    // Ensure date inputs display in English locale
-    startDateInput.setAttribute('lang', 'en-US');
-    endDateInput.setAttribute('lang', 'en-US');
-    
-    // Set locale for date picker (browser-dependent, but helps with some browsers)
-    if (startDateInput.type === 'date') {
-        startDateInput.setAttribute('data-locale', 'en-US');
-        endDateInput.setAttribute('data-locale', 'en-US');
-    }
+    // Store picker instances for later use
+    window.startDatePicker = startDatePicker;
+    window.endDatePicker = endDatePicker;
 }
 
 /**
@@ -129,24 +136,37 @@ function setupEventListeners() {
 function validateCustomDateRange() {
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
-    const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
-    const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+    const startDateStr = startDateInput.value;
+    const endDateStr = endDateInput.value;
     
-    if (startDate && endDate) {
-        const diffTime = Math.abs(endDate - startDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays > 30) {
-            alert('Custom date range cannot exceed one month');
-            endDateInput.value = '';
-            return false;
+    if (!startDateStr || !endDateStr) {
+        return true; // Allow empty dates
+    }
+    
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return true; // Invalid dates, let flatpickr handle it
+    }
+    
+    const diffTime = Math.abs(endDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 30) {
+        alert('Custom date range cannot exceed one month');
+        if (window.endDatePicker) {
+            window.endDatePicker.clear();
         }
-        
-        if (startDate > endDate) {
-            alert('Start date cannot be later than end date');
-            endDateInput.value = '';
-            return false;
+        return false;
+    }
+    
+    if (startDate > endDate) {
+        alert('Start date cannot be later than end date');
+        if (window.endDatePicker) {
+            window.endDatePicker.clear();
         }
+        return false;
     }
     
     return true;
