@@ -27,6 +27,11 @@ body {
   text-align: center;
 }
 
+app-search-bar {
+  display: block;
+  margin: 0 1.5rem;
+}
+
 .favorite-list-header {
   margin-bottom: 1.5rem;
 }
@@ -230,6 +235,10 @@ body {
 
 /* Responsive design */
 @media (max-width: 768px) {
+  app-search-bar {
+    margin: 0 1rem;
+  }
+
   .favorite-list-container {
     padding: 1rem;
   }
@@ -265,6 +274,10 @@ body {
 }
 
 @media (max-width: 480px) {
+  app-search-bar {
+    margin: 0 0.75rem;
+  }
+
   .favorite-list-container {
     padding: 1rem;
   }

@@ -11,10 +11,12 @@ import {
   orderBy,
   serverTimestamp,
 } from "firebase/firestore";
+import { showSuccess, showError } from "./notifications.js";
+import { getMainPath } from "../utils/navigation.js";
 // Initialize Firebase
 onAuthReady((user) => {
   if (!user) {
-    alert("You must be logged in to submit a report.");
+    showError("You must be logged in to submit a report.");
     return;
   }
 
@@ -28,27 +30,38 @@ onAuthReady((user) => {
       const username = user.displayName || user.email || user.uid;
       const type = document.getElementById("type").value;
       const comment = document.getElementById("comment").value;
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
 
-        try {
-          // Add document to Firestore
-          await addDoc(collection(db, "trafficReports"), {
-            username,
-            type,
-            comment,
-            lat,
-            lng,
-            createAt: serverTimestamp(),
-          });
+          try {
+            // Add document to Firestore
+            await addDoc(collection(db, "trafficReports"), {
+              username,
+              type,
+              comment,
+              lat,
+              lng,
+              createAt: serverTimestamp(),
+            });
 
-          alert("Report sent successfully!");
-          e.target.reset();
-        } catch (error) {
-          console.error("Error adding document: ", error);
-          alert("Failed to send report.");
+            showSuccess("Report sent successfully!");
+            e.target.reset();
+            
+            // 跳转到 main page
+            setTimeout(() => {
+              window.location.href = getMainPath();
+            }, 1000);
+          } catch (error) {
+            console.error("Error adding document: ", error);
+            showError("Failed to send report.");
+          }
+        },
+        (error) => {
+          console.error("Error getting location: ", error);
+          showError("Failed to get your location. Please enable location services.");
         }
-      });
+      );
     });
 });
