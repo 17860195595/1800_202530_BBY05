@@ -140,6 +140,9 @@ function displayRouteOnMap(result) {
     ${result.address}
   `);
 
+  // Update destination input field dynamically
+  updateDestinationInput(result);
+
   // Draw route if user location exists
   if (userLocation) {
     drawRoute(userLocation, [result.lat, result.lng]);
@@ -148,6 +151,25 @@ function displayRouteOnMap(result) {
   }
 
   console.log("Display route detail:", result);
+}
+
+/** Update destination input field with route data */
+function updateDestinationInput(result) {
+  const locationInput = document.getElementById("userLocation");
+  if (!locationInput) return;
+
+  // Use name or address from route data, truncate if too long
+  if (result.name) {
+    locationInput.value = result.name.length > 40 
+      ? result.name.substring(0, 37) + "..." 
+      : result.name;
+  } else if (result.address) {
+    locationInput.value = result.address.length > 40 
+      ? result.address.substring(0, 37) + "..." 
+      : result.address;
+  } else {
+    locationInput.value = "Destination";
+  }
 }
 
 // ==============================================
