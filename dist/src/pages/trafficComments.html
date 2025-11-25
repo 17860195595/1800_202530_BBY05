@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Comments - ClearWay</title>
+  <script type="module" crossorigin src="/assets/trafficComments-B-Jb6xvG.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/components-YsRQu0Q4.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-DAUOFwH1.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebaseConfig-DA3vMik7.js">
+  <link rel="modulepreload" crossorigin href="/assets/trafficService-Bx4fwI7A.js">
+  <link rel="stylesheet" crossorigin href="/assets/components-eapcKjT8.css">
+  <link rel="stylesheet" crossorigin href="/assets/trafficComments-fQEKprRo.css">
+</head>
+<body>
+    <app-page-header title="Traffic Comments"></app-page-header>
+    
+    <div class="traffic-comments-container">
+        <!-- Filter Section -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label class="filter-label">Time Filter</label>
+                <div class="time-filter-buttons">
+                    <button class="filter-btn active" data-time="1day">1 Day</button>
+                    <button class="filter-btn" data-time="1week">1 Week</button>
+                    <button class="filter-btn" data-time="1month">1 Month</button>
+                    <button class="filter-btn" data-time="custom">Custom</button>
+                </div>
+            </div>
+            
+            <div class="filter-group custom-date-group" id="customDateGroup" style="display: none;" lang="en">
+                <label class="filter-label">Custom Date Range</label>
+                <div class="date-inputs" lang="en">
+                    <input type="text" id="startDate" class="date-input" placeholder="Start Date" readonly>
+                    <span class="date-separator">to</span>
+                    <input type="text" id="endDate" class="date-input" placeholder="End Date" readonly>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Type Filter</label>
+                <div class="type-filter-buttons">
+                    <button class="filter-btn type-btn active" data-type="all">All</button>
+                    <button class="filter-btn type-btn" data-type="accident">Accident</button>
+                    <button class="filter-btn type-btn" data-type="traffic">Traffic</button>
+                    <button class="filter-btn type-btn" data-type="roadblock">Roadblock</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Count -->
+        <div class="results-count">
+            <span id="resultsCount">0</span> Traffic Reports
+        </div>
+        
+        <!-- Traffic Comments List -->
+        <div id="trafficCommentsList" class="traffic-comments-list">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+    
+    <app-footer></app-footer>
+</body>
+</html>
+

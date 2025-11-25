@@ -23,6 +23,8 @@ export default defineConfig({
         favoriteList: resolve(__dirname, 'src/pages/favorateList.html'),
         routeDetail: resolve(__dirname, 'src/pages/routeDetail.html'),
         report: resolve(__dirname, 'src/pages/report.html'),
+        settings: resolve(__dirname, 'src/pages/settings.html'),
+        trafficComments: resolve(__dirname, 'src/pages/trafficComments.html'),
         // Components entry point
         components: resolve(__dirname, 'src/components/components.js'),
       },

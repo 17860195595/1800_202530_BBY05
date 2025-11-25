@@ -1,28 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Favorite Routes - ClearWay</title>
-  <script type="module" crossorigin src="/assets/favoriteList-BJXnTgbW.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/components-ZI4bmTv0.js">
-  <link rel="stylesheet" crossorigin href="/assets/components-K-Cx5oLW.css">
-  <link rel="stylesheet" crossorigin href="/assets/favoriteList-Cnbbl7W0.css">
-</head>
-<body>
+    <script type="module" crossorigin src="/assets/favoriteList-BD7WOXKz.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+    <link rel="modulepreload" crossorigin href="/assets/components-YsRQu0Q4.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-DAUOFwH1.js">
+    <link rel="modulepreload" crossorigin href="/assets/firebaseConfig-DA3vMik7.js">
+    <link rel="modulepreload" crossorigin href="/assets/favoritesService-Dfn4QY0M.js">
+    <link rel="stylesheet" crossorigin href="/assets/components-eapcKjT8.css">
+    <link rel="stylesheet" crossorigin href="/assets/favoriteList-C00gjLzI.css">
+  </head>
+  <body>
     <app-page-header title="Favorite Routes"></app-page-header>
-    
+    <br />
+    <h3 class="Save-Header">Save A Route</h3>
+    <br />
+    <app-search-bar></app-search-bar>
     <div class="favorite-list-container">
-        <div class="favorite-list-header">
-            <h2>My Favorite Routes</h2>
+      <div class="favorite-list-header">
+        <h2>My Favorite Routes</h2>
+      </div>
+
+      <div id="favoriteRoutes" class="favorite-routes-list">
+        <!-- Loading state -->
+        <div class="favorites-loading" id="favoritesLoading">
+          <div class="loading-spinner"></div>
+          <p>Loading your favorite routes...</p>
         </div>
-        
-        <div id="favoriteRoutes" class="favorite-routes-list">
-            <!-- Favorite routes will be displayed here -->
-        </div>
+      </div>
     </div>
-    
+
     <app-footer></app-footer>
-</body>
+  </body>
 </html>
