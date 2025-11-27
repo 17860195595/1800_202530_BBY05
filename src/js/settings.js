@@ -1,11 +1,13 @@
 import { db } from './firebaseConfig.js';
 import { collection, addDoc, getDocs } from "firebase/firestore";
+import { auth } from "./firebaseConfig.js";
   
   
 const form = document.getElementById("myForm");
 
 form.addEventListener("submit", async (eventVariable) =>{
     eventVariable.preventDefault();
+console.log("eventVariable",eventVariable);
 
     const name = form.name.value;
     const lastname = form.lastname.value;
@@ -43,7 +45,7 @@ async function displayUserInfo() {
         querySnapshot.forEach((doc) => {
             lastUser = doc.data(); // overwrite u
         });
-
+console.log("namedom",nameEl)
         if (lastUser) {
             nameEl.textContent = lastUser.name;
             lastnameEl.textContent = lastUser.lastname;
