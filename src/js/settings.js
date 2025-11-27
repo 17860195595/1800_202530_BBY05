@@ -1,65 +1,69 @@
 import { db } from './firebaseConfig.js';
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "./firebaseConfig.js";
+import { onAuthStateChanged, } from "firebase/auth";
   
   
 const form = document.getElementById("myForm");
 
 form.addEventListener("submit", async (eventVariable) =>{
     eventVariable.preventDefault();
-console.log("eventVariable",eventVariable);
+    console.log("eventVariable", eventVariable);
 
     const name = form.name.value;
     const lastname = form.lastname.value;
     const username = form.username.value;
 
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        alert("you need to be logged in");
+        return;
+    }
+
     try {//await makes it async
-        await addDoc(collection(db, "userz"), {
+        await setDoc(doc(db, "users", currentUser.uid), {
             name: name,
             lastname: lastname,
             username: username,
             createdAt: new Date()
-        });
-        alert("8saved to firestore8")
+        }, {merge: true});
+                
+        if (nameEl) nameEl.textContent = name || ''; //if dom exists update it to nameel or into blank 9this is for auto update)
+        if (lastnameEl) lastnameEl.textContent = lastname || '';
+        if (usernameEl) usernameEl.textContent = username || '';
+        alert("saved to firestore")
         form.reset();
     
     }   catch (err) {
         console.error(err);
-        alert("8error saving creds to firestore8")
+        alert("error saving creds to firestore")
     }
-
-    
 });
 
 // Elements where i show data
-const nameEl = document.querySelector('.show-cred-container p:nth-of-type(1)');
-const lastnameEl = document.querySelector('.show-cred-container p:nth-of-type(2)');
-const usernameEl = document.querySelector('.show-cred-container p:nth-of-type(3)');
+const nameEl = document.querySelector('.show-cred-container div:nth-of-type(2) > p');
+const lastnameEl = document.querySelector('.show-cred-container div:nth-of-type(3) > p');
+const usernameEl = document.querySelector('.show-cred-container div:nth-of-type(4) > p');
 
-async function displayUserInfo() {
-    try {
-        const querySnapshot = await getDocs(collection(db, "userz"));
-        
-        // latest user
-        let lastUser = null;
-        querySnapshot.forEach((doc) => {
-            lastUser = doc.data(); // overwrite u
-        });
-console.log("namedom",nameEl)
-        if (lastUser) {
-            nameEl.textContent = lastUser.name;
-            lastnameEl.textContent = lastUser.lastname;
-            usernameEl.textContent = lastUser.username;
-        } else {
-            nameEl.textContent = "No user found";
-            lastnameEl.textContent = "-";
-            usernameEl.textContent = "-";
-        }
-
-    } catch (err) {
-        console.error("Error getting user info:", err);
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        console.log("needa log in first");
+        return;
     }
-}
 
-//call function at the end
-displayUserInfo();
+    const userDocRef = doc(db, "users", user.uid); // gets pointer
+    const userDocSnap = await getDoc(userDocRef); // reads data from pointer
+
+    if (userDocSnap.exists()) {
+        const userData = userDocSnap.data(); // gets data
+        const authName = user.displayName || '';
+        const nameToShow = authName || userData.username || userData.name || '';
+
+        nameEl.textContent = userData.name;
+        lastnameEl.textContent = userData.lastname;
+        usernameEl.textContent = userData.username || authName;
+    } else {
+        console.log("missing document");
+    }
+})
+

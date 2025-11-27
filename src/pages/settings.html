@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
+        <meta charset="UTF-8" />
         <title>settings page</title>
 
         <!--this is the fonts-->
@@ -16,13 +16,8 @@
         <link rel="stylesheet" href="/src/styles/settings.css" />
 
         <!--firebase js-->
-        
 
-        <!--profile upload JS-->
-        <script type="module" src="/src/js/profile.js"></script>
 
-        <!--credentials upload js-->
-        <script type="module" src="/src/js/settings.js"></script>
 
         <!--the js module-->
         <script type="module" src="/src/components/components.js"></script>
@@ -32,71 +27,88 @@
         <app-navbar></app-navbar>
 
         <!--profile banner-->
-        <div class="pfp-banner">
-            <!--pfp picture-->
-            <div class="pfp-pic">
-                <div class="show-cred-container">
-                <h1>Current user info</h1>
-                <p>name placeholder</p>
-                <p>lastname placeholder</p>
-                <p>username placeholder</p>
-                <div id="creds-go-here" class="creds">
-                </div>
-            </div>
+        <div class="profile-banner">
+            <!--pfp picture banner-->
+            <div class="pfp-pic-banner">
+                
                 <img id="pfp-image" src="/src/assets/images/pfp-paceholder.jpg" alt="place holder for pfp">
             </div>
             <!--reset button under the picture-->
             <button id="reset-pfp">Reset Picture</button>
             <input type="file" id="upload-pfp" accept="image/*" style="display: none;">
         </div>
+        <div class="creds-banner">
+
+            <div class="show-cred-container">
+                <!--title-->
+                <div>
+                    <h2>Current user info</h2>
+                </div>
+                <!--display placeholder-->
+                <div>
+                    <h3>name:</h3><p></p>
+                </div> 
+                <!--display placeholder-->
+                <div>
+                    <h3>last name:</h3><p></p>
+                </div> 
+                <!--display placeholder-->
+                <div>
+                    <h3>username:</h3><p></p>
+                </div> 
+            </div>
+
+            <button type="submit" id="submit-button" form="myForm">Submit</button> <!--button link to form using form="myForm"-->
+        </div>
+       
+
         <br>
         <!--form-->
         <form id="myForm">
-            <!--account options banner-->
-            <fieldset class="fieldset-containers">
 
+
+            <!--account options banner-->
+            <fieldset class="fieldset-containers"> <!--name fieldset-->
                 <div class="fieldset-banner">
-                    <div class ="fieldset-legend">
+                    <div class="fieldset-legend">
                         <legend for="name">Name:</legend>
                     </div>
                     <div class="input-container">
-                        <input name="name" type="text" id="name" pattern="[A-Za-z]{1,20}" placeholder="Your Name">
-                        <button type="submit" id="submit-button-name">Submit</button>
+                        <input name="name" type="text" id="name" pattern="[A-Za-z]{1,20}" placeholder="Your Name" required>
                     </div>
-
                 </div>
             </fieldset>
             <br><br>
-            <fieldset class="fieldset-containers">
-
+            <fieldset class="fieldset-containers"> <!--lastname fieldset-->
                 <div class="fieldset-banner">
-                    <div class ="fieldset-legend">
+                    <div class="fieldset-legend">
                         <legend for="name">Last Name:</legend>
                     </div>
                     <div class="input-container">
-                        <input name="lastname" type="text" id="lastname" pattern="[A-Za-z]{1,20}" placeholder="Your last name">
-                        <button type="submit" id="submit-button-lastname">Submit</button>
+                        <input name="lastname" type="text" id="lastname" pattern="[A-Za-z]{1,20}" placeholder="Your last name" required>
                     </div>
-
                 </div>
             </fieldset>
             <br><br>
-            <fieldset class="fieldset-containers">
-
+            <fieldset class="fieldset-containers"> <!--username fieldset-->
                 <div class="fieldset-banner">
-                    <div class ="fieldset-legend">
+                    <div class="fieldset-legend">
                         <legend for="name">Username:</legend>
                     </div>
                     <div class="input-container">
-                        <input name="username" type="text" id="username" pattern="[A-Za-z]{1,20}" placeholder="Your username">
-                        <button type="submit" id="submit-button-username">Submit</button>
+                        <input name="username" type="text" id="username" pattern="[A-Za-z]{1,20}" placeholder="Your username" required>
                     </div>
-
                 </div>
             </fieldset>
-            
         </form>
+
         <!--imported footer-->
         <app-footer></app-footer>
+
+        <!--profile upload JS-->
+        <script type="module" src="/src/js/profile.js"></script>
+
+        <!--credentials upload js-->
+        <script type="module" src="/src/js/settings.js"></script>
     </body>
 </html>

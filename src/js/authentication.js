@@ -61,9 +61,11 @@ export async function signupUser(name, email, password) {
   const user = userCredential.user;
 
   // Update display name in Auth
+  await updateProfile(user, { username: name });
   await updateProfile(user, { displayName: name });
+ // added username field
 
-  // Create Firestore document in "userz"
+  // Create Firestore document in "user"
   await setDoc(doc(db, "users", user.uid), {
     displayName: name,
     email: email,
