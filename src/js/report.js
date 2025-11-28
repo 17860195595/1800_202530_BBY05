@@ -9,6 +9,7 @@ import {
   deleteDoc,
   doc,
   orderBy,
+  getDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { showSuccess, showError } from "./notifications.js";
@@ -26,10 +27,17 @@ onAuthReady((user) => {
     .addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      //for username field grabber from colelction
+      const userDocRef = doc(db, "users", user.uid) //gets pointer
+      const userDocSnap = await getDoc(userDocRef); //reads from pointer
+      const userData = userDocSnap.data(); //gets data
+
+
       // Collect input values
-      const username = user.displayName || user.email || user.uid;
+      const username = userData.username || user.email || user.uid;
       const type = document.getElementById("type").value;
       const comment = document.getElementById("comment").value;
+      
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const lat = pos.coords.latitude;
@@ -48,7 +56,8 @@ onAuthReady((user) => {
 
             showSuccess("Report sent successfully!");
             e.target.reset();
-            
+
+
             // 跳转到 main page
             setTimeout(() => {
               window.location.href = getMainPath();

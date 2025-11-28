@@ -32,14 +32,16 @@ form.addEventListener("submit", async (eventVariable) =>{
             createdAt: new Date()
         }, {merge: true});
                 
-        if (nameEl) nameEl.textContent = name || ''; //if dom exists update it to nameel or into blank 9this is for auto update)
+        if (nameEl) nameEl.textContent = name || ''; //if dom exists update it to nameel or into blank (this is for auto update)
         if (lastnameEl) lastnameEl.textContent = lastname || '';
         if (usernameEl) usernameEl.textContent = username || '';
 
-        //if username exists delete displayName field
+        //grabs username from database
         const userDocRef = doc(db, "users", currentUser.uid) //gets pointer
         const userDocSnap = await getDoc(userDocRef); //reads from pointer
         const userData = userDocSnap.data(); //gets data
+
+        //if username exists delete displayName field
         if(userData.username) {
             await updateDoc(doc(db, 'users', currentUser.uid), { displayName: deleteField() });
             await updateProfile(currentUser, { displayName: null})

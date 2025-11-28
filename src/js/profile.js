@@ -1,72 +1,79 @@
-import { auth, db, storage } from "./firebaseConfig.js";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const pfpImage = document.getElementById("pfp-image");
-  const uploadInput = document.getElementById("upload-pfp");
-  const resetBtn = document.getElementById("reset-pfp");
+document.addEventListener('DOMContentLoaded', () => { //waits for html page to be fully loaded
+  //my main variables
+  const auth = getAuth(); //authentication instance
+  const db = getFirestore(); //database instance
+  //!!!!!!!!!!!wont use storage instance since i am gonna do base 64 string to store imgs!!!!!
 
-  let currentUser = null;
 
-  // make it so user has to be logged in to change pfp
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    currentUser = user;
+  const pfpImage = document.getElementById('pfpImage');
+  const resetBtn = document.getElementById('reset-pfp');
+  const pfpInput = document.getElementById('upload-pfp');
 
-    // loads the pfp from firestore
-    const pfpDocRef = doc(db, "pfp", user.uid);
-    try {
-      const pfpSnap = await getDoc(pfpDocRef);
-      if (pfpSnap.exists() && pfpSnap.data().image) {
-        pfpImage.src = pfpSnap.data().image;
+  const placeholder = "/src/assets/images/pfp-paceholder.jpg";
+
+  pfpImage.addEventListener('click', () => {
+    console.log("clicked image"); 
+    pfpInput.click(); //trigger file input click
+  });
+
+
+  //the upload to database function
+  pfpInput.addEventListener("change", async () => {
+    const file = pfpInput.files[0]; // Get the selected file
+    if (!file) return alert("No file selected");
+
+    const user = auth.currentUser;
+    if (!user) return alert("u need to log in");
+
+    const reader = new FileReader(); //creates file reader object (like scanner in java)
+    reader.onload = async (e) => { //function when file is done reading. (e contains result of reading the file)
+      const base64String = e.target.result; // Get base64 string from file being read (e.target  = reader object)
+
+      await setDoc(doc(db, "users", user.uid), {
+      pfp: base64String
+      }, { merge: true });
+
+      pfpImage.src = base64String; // Update pfp on page
+    }
+    reader.readAsDataURL(file); //triggers the callback function passing file into it
+  })
+
+
+
+
+    // make it so user has to be logged in to change pfp
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return alert("u need to log in");
+
+      const userDocRef = doc(db, "users", user.uid);//pointer to user doc
+      const userDocSnap = await getDoc(userDocRef);//read from pointer
+
+      if (userDocSnap.exists()) { //if there is data in the document
+        const data = userDocSnap.data();//get data
+
+        if (data.pfp) {
+          pfpImage.src = data.pfp; //set pfp image source to the data from firestore database
+        } 
+        else {
+          pfpImage.src = "/src/assets/images/pfp-paceholder.jpg"; //my placeholder png
+        }
       }
-    } catch (err) {
-      console.error("Error loading profile picture:", err);
-    }
+    });
 
-  });
 
-  // listner for picking new pfp
-  pfpImage.addEventListener("click", () => uploadInput.click());
-
-  // makes file input into the actuall pfp
-  uploadInput.addEventListener("change", async (event) => {
-    const file = event.target.files[0];
-    if (!file || !currentUser) return;
-
-    //this makes it so it shows up instantly
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      pfpImage.src = e.target.result; // Update placeholder instantly
-    };
-    reader.readAsDataURL(file);
-
-    try {
-      // Upload to Firebase Storage
-      const storageRef = ref(storage, `profilePictures/${currentUser.uid}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-
-      // Save download URL in Firestore
-      const pfpDocRef = doc(db, "pfp", currentUser.uid);
-      await setDoc(pfpDocRef, { image: downloadURL }, { merge: true });
-
-      // Force browser to refresh image
-      pfpImage.src = downloadURL + "?t=" + new Date().getTime();
-    } catch (err) {
-      console.error("Error uploading profile picture:", err);
-    }
-  });
-
-  // pfp reset button
+  // Reset profile picture
   resetBtn.addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) return alert("u need to log in");
+
     const placeholder = "/src/assets/images/pfp-paceholder.jpg";
     pfpImage.src = placeholder;
 
-    if (!currentUser) return;
-    const pfpDocRef = doc(db, "pfp", currentUser.uid);
-    await setDoc(pfpDocRef, { image: null }, { merge: true });
+    // Clear pfp from Firestore
+    await setDoc(doc(db, "users", user.uid), { pfp: null }, { merge: true });
   });
 });

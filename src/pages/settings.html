@@ -21,6 +21,12 @@
 
         <!--the js module-->
         <script type="module" src="/src/components/components.js"></script>
+
+        <!--profile upload JS-->
+        <script type="module" src="/src/js/profile.js"></script>
+
+        <!--credentials upload js-->
+        <script type="module" src="/src/js/settings.js"></script>
     </head>
     <body>
         <!--imported navbar-->
@@ -31,7 +37,7 @@
             <!--pfp picture banner-->
             <div class="pfp-pic-banner">
                 
-                <img id="pfp-image" src="/src/assets/images/pfp-paceholder.jpg" alt="place holder for pfp">
+                <img id="pfpImage" src="/src/assets/images/pfp-paceholder.jpg" alt="place holder for pfp">
             </div>
             <!--reset button under the picture-->
             <button id="reset-pfp">Reset Picture</button>
@@ -105,10 +111,6 @@
         <!--imported footer-->
         <app-footer></app-footer>
 
-        <!--profile upload JS-->
-        <script type="module" src="/src/js/profile.js"></script>
 
-        <!--credentials upload js-->
-        <script type="module" src="/src/js/settings.js"></script>
     </body>
 </html>
