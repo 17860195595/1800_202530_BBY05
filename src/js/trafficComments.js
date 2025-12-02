@@ -457,26 +457,82 @@ async function loadAddressForReport(report) {
  */
 async function reverseGeocode(lat, lng) {
     try {
-        const url = `/api/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`;
+        // 检测环境：开发环境使用 Vite 代理，生产环境使用 CORS 代理
+        const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`;
         
-        const response = await fetch(url, {
-            headers: {
-                'Accept': 'application/json'
+        if (isDev) {
+            // 开发环境：使用 Vite 代理
+            const url = `/api/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`;
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const data = await response.json();
+            if (data && data.display_name) {
+                return formatAddress(data);
+            }
+            throw new Error('No address found');
+        } else {
+            // 生产环境：直接使用 CORS 代理服务（Nominatim 不支持 CORS，跳过直接调用）
+            const proxyServices = [
+                // 方案1: 使用 allorigins.win raw 模式（最快，返回原始 JSON）
+                {
+                    url: `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`,
+                    parseResponse: (data) => data,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                },
+                // 方案2: 使用 allorigins.win 标准模式（备用方案）
+                {
+                    url: `https://api.allorigins.win/get?url=${encodeURIComponent(nominatimUrl)}`,
+                    parseResponse: (data) => {
+                        if (data && data.contents) {
+                            return JSON.parse(data.contents);
+                        }
+                        return data;
+                    },
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }
+            ];
+            
+            let lastError = null;
+            for (const proxy of proxyServices) {
+                try {
+                    const response = await fetch(proxy.url, {
+                        method: 'GET',
+                        headers: proxy.headers,
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    let data = await response.json();
+                    data = proxy.parseResponse(data);
+                    
+                    if (data && data.display_name) {
+                        return formatAddress(data);
+                    }
+                } catch (error) {
+                    console.warn(`Reverse geocoding proxy failed: ${proxy.url}`, error);
+                    lastError = error;
+                    continue;
+                }
+            }
+            
+            throw lastError || new Error('All proxy services failed');
         }
-        
-        const data = await response.json();
-        
-        if (data && data.display_name) {
-            // Extract a more readable address
-            return formatAddress(data);
-        }
-        
-        throw new Error('No address found');
     } catch (error) {
         console.error('Reverse geocoding error:', error);
         throw error;

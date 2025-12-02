@@ -615,17 +615,29 @@ function updateLocationInput(lat, lng) {
   const locationInput = document.getElementById("userLocation");
   if (!locationInput) return;
 
-  fetch(
-    `/api/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-    {
-      headers: {
-        Accept: "application/json",
-      },
-    }
-  )
+  // 检测环境：开发环境使用 Vite 代理，生产环境使用 CORS 代理
+  const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
+  
+  let url;
+  if (isDev) {
+    // 开发环境：使用 Vite 代理
+    url = `/api/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
+  } else {
+    // 生产环境：使用 allorigins.win raw 模式（更快，直接返回 JSON）
+    url = `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`;
+  }
+
+  fetch(url, {
+    headers: {
+      Accept: "application/json"
+    },
+  })
     .then((response) => response.json())
     .then((data) => {
-      if (data.display_name) {
+      // raw 模式直接返回 JSON，无需解析
+      
+      if (data && data.display_name) {
         locationInput.value =
           data.display_name.split(",")[0] || "Current Location";
       } else {
