@@ -14,6 +14,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import {
   buildDestinationKey,
   isFavorite,
@@ -53,7 +54,11 @@ document.addEventListener("DOMContentLoaded", function () {
   loadRouteDetail();
   tryGetUserLocationOnInit();
   setupEventListeners();
-  checkIfRouteIsSaved();
+  
+  // Wait for auth state to be ready before checking if route is saved
+  onAuthStateChanged(auth, (user) => {
+    checkIfRouteIsSaved();
+  });
 
   // Test Firebase connection
   testFirebaseConnection();
@@ -115,6 +120,8 @@ function loadRouteDetail() {
       // Persist last route detail for refresh restore
       localStorage.setItem("lastRouteDetail", JSON.stringify(result));
       // Keep sessionStorage for back navigation reuse
+      // Check if route is saved after loading route data
+      checkIfRouteIsSaved();
     } catch (e) {
       console.warn("Failed to parse routeDetail:", e);
     }
@@ -1079,10 +1086,30 @@ function checkIfRouteIsSaved() {
   }
 
   // Firestore: check via service
-  if (!db) return;
-  isFavorite(currentRouteData.lat, currentRouteData.lng)
-    .then((ok) => ok && updateSaveButtonUI(true))
-    .catch((err) => console.warn("checkIfRouteIsSaved failed:", err));
+  if (!db) {
+    updateSaveButtonUI(false);
+    return;
+  }
+  
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    // User not logged in, button should show "Save"
+    updateSaveButtonUI(false);
+    return;
+  }
+  
+  isFavorite(userId, currentRouteData.lat, currentRouteData.lng)
+    .then((ok) => {
+      if (ok) {
+        updateSaveButtonUI(true);
+      } else {
+        updateSaveButtonUI(false);
+      }
+    })
+    .catch((err) => {
+      console.warn("checkIfRouteIsSaved failed:", err);
+      updateSaveButtonUI(false);
+    });
 }
 
 /** Save or unsave route */
