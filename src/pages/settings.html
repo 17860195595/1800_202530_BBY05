@@ -2,22 +2,11 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>settings page</title>
-
-        <!--this is the fonts-->
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-            crossorigin=""
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>settings page</title>     
 
         <!--style sheet-->
         <link rel="stylesheet" href="/src/styles/settings.css" />
-
-        <!--firebase js-->
-
-
 
         <!--the js module-->
         <script type="module" src="/src/components/components.js"></script>
@@ -48,19 +37,19 @@
             <div class="show-cred-container">
                 <!--title-->
                 <div>
-                    <h2>Current user info</h2>
+                    <h2>Your Information</h2>
                 </div>
                 <!--display placeholder-->
                 <div>
-                    <h3>name:</h3><p></p>
+                    <h3>Name:</h3><p></p>
                 </div> 
                 <!--display placeholder-->
                 <div>
-                    <h3>last name:</h3><p></p>
+                    <h3>Last Name:</h3><p></p>
                 </div> 
                 <!--display placeholder-->
                 <div>
-                    <h3>username:</h3><p></p>
+                    <h3>Username:</h3><p></p>
                 </div> 
             </div>
 
@@ -77,7 +66,7 @@
             <fieldset class="fieldset-containers"> <!--name fieldset-->
                 <div class="fieldset-banner">
                     <div class="fieldset-legend">
-                        <legend for="name">Name:</legend>
+                        <legend for="name">Name</legend>
                     </div>
                     <div class="input-container">
                         <input name="name" type="text" id="name" pattern="[A-Za-z]{1,20}" placeholder="Your Name.." required>
@@ -88,7 +77,7 @@
             <fieldset class="fieldset-containers"> <!--lastname fieldset-->
                 <div class="fieldset-banner">
                     <div class="fieldset-legend">
-                        <legend for="name">Last Name:</legend>
+                        <legend for="name">Last Name</legend>
                     </div>
                     <div class="input-container">
                         <input name="lastname" type="text" id="lastname" pattern="[A-Za-z]{1,20}" placeholder="Your last name.." required>
@@ -99,7 +88,7 @@
             <fieldset class="fieldset-containers"> <!--username fieldset-->
                 <div class="fieldset-banner">
                     <div class="fieldset-legend">
-                        <legend for="name">Username:</legend>
+                        <legend for="name">Username</legend>
                     </div>
                     <div class="input-container">
                         <input name="username" type="text" id="username" pattern="[A-Za-z]{1,20}" placeholder="Your username.." required>

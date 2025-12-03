@@ -1,69 +1,82 @@
-body {
-    display: flex;
-    flex-direction: column;
+/* ===================== all page ===================== */
+
+* {
+    box-sizing: border-box;
 }
 
-.profile-banner{
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ===================== pfp banner ===================== */
+
+.profile-banner {
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-.pfp-pic-banner {  
-    display: flex;             
-    justify-content: center;   
-    width: 100%;    /*so the container of the img is from end to end*/  
-    height: 50%;
-    
+.pfp-pic-banner {
+    display: flex;
+    justify-content: center;
+    width: 100%;
     padding: 20px;
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-bottom: 0.1px solid #000000;
-        box-shadow:
+    box-shadow:
         0 0 5px rgb(0, 0, 1),
         0 0 10px rgb(67, 67, 67),
         0 0 20px rgb(178, 178, 178),
         0 0 40px rgb(247, 247, 247);
-
 }
 
 .pfp-pic-banner img {
     height: 230px;
+    width: 230px;
     max-width: 230px;
     border: 4px solid #05184d;
     border-radius: 50%;
-    object-fit: cover;  
-    pointer-events: auto;        
-    cursor: pointer;            /* does the clicable popup thingy */
+    object-fit: cover;
+    cursor: pointer;
     transition: 0.3s ease;
 }
 
 .pfp-pic-banner img:hover {
     opacity: 0.8;
+    transform: scale(1.15);
+    box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.4);
 }
-/*---------------------------------------credits--------------------------------------------------*/
 
-.creds-banner{
+/* ===================== creds and sub button ===================== */
+
+.creds-banner {
     display: flex;
-    justify-content: space-evenly; /*horizontal centre for child divs*/
-    align-items: center; /*vertical centre for child divs*/
+    justify-content: space-evenly;
+    align-items: center;
     width: 100%;
     margin-top: 20px;
     gap: 20px;
+    flex-wrap: wrap;   
 }
 
-.show-cred-container{ /* absolute = ignores others kinda*/
+.show-cred-container {
     display: flex;
     flex-direction: column;
     width: 30%;
-    border: 2px solid rgb(58, 1, 218); 
-    box-shadow:
-        0 0 5px rgb(20, 7, 196),
-        0 0 10px rgb(36, 4, 218),
-        0 0 20px rgb(52, 0, 240),
-        0 0 40px rgb(3, 7, 223);
+    min-width: 250px;     
+    border: 1px solid rgb(133, 133, 133);
     padding: 20px;
-    border-radius: 20px; 
- 
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: 0.3s ease;
+}
+
+.show-cred-container:hover {
+    transform: scale(1.02);
+    box-shadow: 5px 10px 15px rgba(0,0,0,0.2);
 }
 
 .show-cred-container div {
@@ -75,159 +88,125 @@ body {
 }
 
 #submit-button {
-    background: rgb(103, 146, 183);
+    background: linear-gradient(135deg, #768be7, #764ba2);
     font-family: Arial, Helvetica, sans-serif;
     color: #030613;
     border-radius: 20px;
     border: 5px solid #000000;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     padding: 20px 40px;
     cursor: pointer;
+    transition: 0.3s ease;
 }
-/*-----------------------------------------------------------------------------------------*/
 
-fieldset {          /*all fieldsets*/
+#submit-button:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scale(1.05);
+    box-shadow: 5px 10px 15px rgba(0,0,0,0.2);
+}
+
+/* ===================== fieldsets area ===================== */
+
+fieldset {
     display: flex;
     justify-content: center;
     border: 0;
+    margin: 0;
+    width: 100%;
 }
 
 .fieldset-banner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 90%;
+    width: 100%;            
+    max-width: 60%;       
     height: 100px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    outline: auto;
+    background: linear-gradient(90deg, rgb(215, 220, 255) 0%, rgb(235, 240, 255) 100%);
     border-radius: 20px;
-    gap: 20px;
     border: 1px solid #000000;
+    padding: 0 20px;
+    gap: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s ease;
+}
+
+.fieldset-banner:hover {
+    transform: scale(1.02);
+    box-shadow: 5px 10px 15px rgba(0,0,0,0.2);
 }
 
 
-.fieldset-legend { 
-    background: rgb(136, 177, 214);
-    letter-spacing:2px;
-    font-weight:bold;
+.fieldset-legend {
+    background-color: white;
+    letter-spacing: 2px;
+    font-weight: bold;
     font-size: 1.5em;
-    min-width: fit-content; /*so text doesent stack*/
-    max-height: 90%;
-    text-align: center;
+    white-space: nowrap;            
     padding: 13px;
-    margin-left: 250px;
     border-radius: 20px;
     border: 1px solid #000000;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .input-container {
-   display: flex;
-   background: rgb(136, 177, 214);
-   width: 50%;
-   margin-right: 150px;
-   border-radius: 20px;
-   color: rgb(0, 0, 0);
-   border: 1px solid #000000;
-   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-#name {
-    padding: 20px;
-    width: 100%;
-    border-radius: 20px;
-}
-
-#name:focus {
-    background: rgba(160, 155, 226, 0.542);
-    color: rgb(0, 0, 0);
-    font-size: 20px;
-    border-radius: 20px;
-    
-}
-
-#name::placeholder {
-    color: rgb(0, 0, 0);       
-    font-size: 20px;
-    font-style: italic;
-}
-
-
-#lastname {
-    padding: 20px;
-    width: 100%;
-    border-radius: 20px;
-}
-
-#lastname:focus {
-    background: rgba(160, 155, 226, 0.542);
-    color: rgb(0, 0, 0);
-    font-size: 20px;
-    border-radius: 20px;
-    
-}
-
-#lastname::placeholder {
-    color: rgb(0, 0, 0);       
-    font-size: 20px;
-    font-style: italic;
-}
-
-#username {
-    padding: 20px;
-    width: 100%;
-    border-radius: 20px;
-}
-
-#username:focus {
-    background: rgba(160, 155, 226, 0.542);
-    color: rgb(0, 0, 0);
-    font-size: 20px;
-    border-radius: 20px;
-    
-}
-
-#username::placeholder {
-    color: rgb(0, 0, 0);       
-    font-size: 20px;
-    font-style: italic;
-}
-
-/*---------------------------------------------------------------------------------------------------------------------*/
-.upload-box {
-    width: 200px;
-    height: 200px;
-    border: 2px dashed #764ba2;
-    border-radius: 15px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    cursor: pointer;
-    position: relative;
-}
-
-.upload-label {
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-#profile-pic {
-    position: absolute;
+    background-color: white;
+    border-radius: 20px;
     width: 100%;
-    height: 100%;
-    opacity: 0; /* Hide the input */
-    cursor: pointer;
+    border: 1px solid #000000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-#preview {
+input[type="text"] { /**type text input sonly so sub button doesent count**/
+    padding: 20px;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 15px;
-    display: none; 
+    border-radius: 20px;
+    border: none;
 }
 
+input[type="text"]:focus {
+    background: linear-gradient(90deg, rgb(215, 220, 255) 0%, rgb(235, 240, 255) 100%);
+    font-size: 20px;
+}
+
+input[type="text"]::placeholder {
+    font-size: 20px;
+    font-style: italic;
+    color: rgb(0, 0, 0);
+}
+
+/* ===================== for mobile view ===================== */
+
+@media (max-width: 480px) {
+
+    body {
+        padding-bottom: 75px !important;
+    }
+
+    .creds-banner {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .show-cred-container {
+        width: 90%;
+    }
+
+    .fieldset-banner {
+        flex-direction: column;
+        height: auto;
+        padding: 20px;
+        min-width: 400px;
+    }
+
+    .input-container {
+        margin: 0;
+        width: 100%;
+    }
+
+    .fieldset-legend {
+        margin: 0;
+        font-size: 1.2em;
+    }
+}
