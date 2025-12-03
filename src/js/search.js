@@ -56,9 +56,8 @@ async function handleSearch(query) {
 // Use Nominatim API for real geocoding search
 async function searchRealLocations(query) {
   try {
-    // Build search URL scoped to Vancouver area
-    // Use proxy path to avoid CORS issues
-    const searchUrl = `/api/nominatim/search?` +
+    // Build Nominatim API URL
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?` +
       `q=${encodeURIComponent(query)}&` +
       `format=json&` +
       `limit=5&` +
@@ -67,33 +66,111 @@ async function searchRealLocations(query) {
       `viewbox=-123.3,49.2,-123.0,49.3&` +
       `addressdetails=1`;
     
-    const response = await fetch(searchUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
+    // 检测环境：开发环境使用 Vite 代理，生产环境使用 CORS 代理
+    // 更严格的环境检测：检查端口号或完整 hostname
+    const isDev = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1' ||
+                  window.location.port === '5173' ||
+                  window.location.port === '4173';
+    
+    if (isDev) {
+      // 开发环境：使用 Vite 代理
+      const searchUrl = `/api/nominatim/search?` +
+        `q=${encodeURIComponent(query)}&` +
+        `format=json&` +
+        `limit=5&` +
+        `countrycodes=ca&` +
+        `bounded=1&` +
+        `viewbox=-123.3,49.2,-123.0,49.3&` +
+        `addressdetails=1`;
+      
+      const response = await fetch(searchUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return normalizeSearchResults(data, query);
+    } else {
+      // 生产环境：直接使用 CORS 代理服务（Nominatim 不支持 CORS，跳过直接调用）
+      const proxyServices = [
+        // 方案1: 使用 allorigins.win raw 模式（最快，返回原始 JSON）
+        {
+          url: `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`,
+          parseResponse: (data) => data,
+          headers: {
+            'Accept': 'application/json'
+          }
+        },
+        // 方案2: 使用 allorigins.win 标准模式（备用方案）
+        {
+          url: `https://api.allorigins.win/get?url=${encodeURIComponent(nominatimUrl)}`,
+          parseResponse: (data) => {
+            if (data && data.contents) {
+              return JSON.parse(data.contents);
+            }
+            return data;
+          },
+          headers: {
+            'Accept': 'application/json'
+          }
+        }
+      ];
+      
+      let lastError = null;
+      for (const proxy of proxyServices) {
+        try {
+          const response = await fetch(proxy.url, {
+            method: 'GET',
+            headers: proxy.headers,
+            mode: 'cors'
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          let data = await response.json();
+          
+          // 使用自定义解析函数
+          data = proxy.parseResponse(data);
+          
+          // 验证数据格式
+          if (Array.isArray(data) && data.length > 0 && data[0].display_name) {
+            return normalizeSearchResults(data, query);
+          }
+        } catch (error) {
+          console.warn(`Proxy service failed: ${proxy.url}`, error);
+          lastError = error;
+          continue; // 尝试下一个代理
+        }
+      }
+      
+      // 所有代理都失败了
+      throw lastError || new Error('All proxy services failed');
     }
-    
-    const data = await response.json();
-    
-    // Normalize API response to our format
-    return data.map((item, index) => ({
-      name: item.display_name.split(',')[0] || query,
-      address: item.display_name,
-      lat: parseFloat(item.lat),
-      lng: parseFloat(item.lon),
-      type: getLocationType(item),
-      importance: item.importance || 0
-    })).sort((a, b) => b.importance - a.importance); // sort by importance
-    
   } catch (error) {
     console.error('Geocoding API error:', error);
     throw error;
   }
+}
+
+// 标准化搜索结果
+function normalizeSearchResults(data, query) {
+  return data.map((item, index) => ({
+    name: item.display_name.split(',')[0] || query,
+    address: item.display_name,
+    lat: parseFloat(item.lat),
+    lng: parseFloat(item.lon),
+    type: getLocationType(item),
+    importance: item.importance || 0
+  })).sort((a, b) => b.importance - a.importance);
 }
 
 // Determine location type based on API data
