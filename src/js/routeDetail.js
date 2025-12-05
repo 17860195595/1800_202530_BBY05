@@ -196,7 +196,7 @@ function drawRoute(start, end) {
 /** Fetch real route from OpenRouteService API */
 async function fetchRouteFromAPI(start, end) {
   try {
-    // 使用服务获取路线
+    // Use service to get route
     const apiKey =
       "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhjMzA4ODEzNTEyNjQ0YmJhOGY3MTQ4NTk2MzJlYWY1IiwiaCI6Im11cm11cjY0In0="; // demo key
     const result = await fetchDrivingRoute(apiKey, start, end);
@@ -413,7 +413,7 @@ function formatDurationFromMinutes(minutes) {
 
 /** Calculate distance using Haversine */
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // 地球半径（公里）
+  const R = 6371; // Earth's radius in kilometers
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -468,12 +468,12 @@ function getUserLocation() {
     (position) => {
       handleUserLocationSuccess(position);
 
-      // 更新位置输入框
+      // Update location input field
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
       updateLocationInput(lat, lng);
 
-      // 如果有目的地，重新绘制路线
+      // If destination exists, redraw route
       if (destinationMarker) {
         drawRoute(userLocation, [
           destinationMarker.getLatLng().lat,
@@ -481,7 +481,7 @@ function getUserLocation() {
         ]);
       }
 
-      // 恢复按钮状态
+      // Restore button state
       if (getLocationBtn) {
         getLocationBtn.disabled = false;
         getLocationBtn.style.opacity = "1";
@@ -511,13 +511,13 @@ function handleUserLocationSuccess(position) {
   const lng = position.coords.longitude;
   const accuracy = position.coords.accuracy;
 
-  // 移除之前的用户位置标记
+  // Remove previous user location marker
   clearMapLayer(userLocationMarker);
 
-  // 创建用户位置标记
+  // Create user location marker
   userLocationMarker = createUserLocationMarker(lat, lng);
 
-  // 添加精度圆圈
+  // Add accuracy circle
   L.circle([lat, lng], {
     radius: accuracy,
     color: "#007bff",
@@ -526,13 +526,13 @@ function handleUserLocationSuccess(position) {
     weight: 2,
   }).addTo(map);
 
-  // 保存用户位置
+  // Save user location
   userLocation = [lat, lng];
 
-  // 调整地图视野
+  // Adjust map view
   adjustMapViewForUserLocation(lat, lng);
 
-  // 绑定弹出窗口
+  // Bind popup
   userLocationMarker
     .bindPopup(
       `
@@ -544,7 +544,7 @@ function handleUserLocationSuccess(position) {
     )
     .openPopup();
 
-  // 如果有目的地，绘制路线
+  // If destination exists, draw route
   if (destinationMarker) {
     drawRoute(userLocation, [
       destinationMarker.getLatLng().lat,
@@ -609,22 +609,22 @@ function addDefaultMarker() {
 }
 
 /**
- * 更新位置输入框
+ * Update location input field
  */
 function updateLocationInput(lat, lng) {
   const locationInput = document.getElementById("userLocation");
   if (!locationInput) return;
 
-  // 检测环境：开发环境使用 Vite 代理，生产环境使用 CORS 代理
+  // Detect environment: use Vite proxy in development, CORS proxy in production
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
   
   let url;
   if (isDev) {
-    // 开发环境：使用 Vite 代理
+    // Development: use Vite proxy
     url = `/api/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
   } else {
-    // 生产环境：使用 allorigins.win raw 模式（更快，直接返回 JSON）
+    // Production: use allorigins.win raw mode (faster, returns JSON directly)
     url = `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`;
   }
 
@@ -635,7 +635,7 @@ function updateLocationInput(lat, lng) {
   })
     .then((response) => response.json())
     .then((data) => {
-      // raw 模式直接返回 JSON，无需解析
+      // Raw mode returns JSON directly, no parsing needed
       
       if (data && data.display_name) {
         locationInput.value =
@@ -751,7 +751,7 @@ function isReportNearRoute(report, start, end) {
 }
 
 /**
- * 测试 Firebase Firestore 连接
+ * Test Firebase Firestore connection
  */
 async function testFirebaseConnection() {
   try {
@@ -763,7 +763,7 @@ async function testFirebaseConnection() {
       return;
     }
 
-    // 尝试读取 trafficReports 集合
+    // Try to read trafficReports collection
     const testRef = collection(db, "trafficReports");
     console.log("Test collection ref created:", testRef);
 
@@ -783,7 +783,7 @@ async function testFirebaseConnection() {
     console.error("Error details:", error.message);
     console.error("Error code:", error.code);
 
-    // 如果是权限错误，提供更具体的帮助
+    // If permission error, provide more specific help
     if (error.code === "permission-denied") {
       console.warn(
         "Permission denied. Please check your Firestore security rules."
@@ -808,13 +808,13 @@ async function testFirebaseConnection() {
 }
 
 /**
- * 向 Firebase Firestore 添加新的交通报告（示例函数）
- * @param {Object} reportData - 报告数据
- * @param {number} reportData.lat - 纬度
- * @param {number} reportData.lng - 经度
- * @param {string} reportData.username - 用户名
- * @param {string} reportData.type - 报告类型
- * @param {string} reportData.comment - 评论
+ * Add new traffic report to Firebase Firestore (example function)
+ * @param {Object} reportData - Report data
+ * @param {number} reportData.lat - Latitude
+ * @param {number} reportData.lng - Longitude
+ * @param {string} reportData.username - Username
+ * @param {string} reportData.type - Report type
+ * @param {string} reportData.comment - Comment
  */
 async function addTrafficReport(reportData) {
   try {
@@ -841,19 +841,19 @@ async function addTrafficReport(reportData) {
 }
 
 /**
- * 在地图上显示交通报告标记
- * @param {Array} reports - 报告数组，每个报告包含坐标和报告数据
+ * Display traffic report markers on map
+ * @param {Array} reports - Report array, each report contains coordinates and report data
  */
 function displayTrafficReports(reports) {
   if (!reports || !Array.isArray(reports) || reports.length === 0) {
     return;
   }
 
-  // 清除之前的交通标记（如果需要在获取新数据时清除）
+  // Clear previous traffic markers (if need to clear when fetching new data)
   // clearAllTrafficMarkers();
 
   reports.forEach((report) => {
-    // 解析坐标（支持 [lat, lng] 或 { lat, lng } 格式）
+    // Parse coordinates (supports [lat, lng] or { lat, lng } format)
     let position = null;
     if (Array.isArray(report.position)) {
       position = report.position;
@@ -868,7 +868,7 @@ function displayTrafficReports(reports) {
       return;
     }
 
-    // 构建报告数据对象
+    // Build report data object
     const reportData = {
       username: report.username,
       type: report.type,
@@ -876,23 +876,23 @@ function displayTrafficReports(reports) {
       createdAt: report.createdAt || report.created_at || report.timestamp,
     };
 
-    // 添加交通标记，携带报告数据
+    // Add traffic marker with report data
     addTrafficMarker(position, {
-      tooltip: "点击查看交通状况",
+      tooltip: "Click to view traffic status",
       report: reportData,
     });
   });
 }
 
 // ==============================================
-// 交通标记管理 - Traffic Marker Management
+// Traffic Marker Management
 // ==============================================
 
 /**
- * 在路线上添加交通标记
- * @param {Array} position - [lat, lng] 坐标
- * @param {Object} options - 选项配置
- * @returns {Object|null} 标记实例
+ * Add traffic marker on route
+ * @param {Array} position - [lat, lng] coordinates
+ * @param {Object} options - Options configuration
+ * @returns {Object|null} Marker instance
  */
 function addTrafficMarker(position, options = {}) {
   if (!map) {
@@ -932,7 +932,7 @@ function addTrafficMarker(position, options = {}) {
 }
 
 /**
- * 创建交通图标
+ * Create traffic icon
  */
 function createTrafficIcon(options) {
   const trafficIconHtml = `
@@ -963,7 +963,7 @@ function createTrafficIcon(options) {
 }
 
 /**
- * 设置交通标记事件
+ * Setup traffic marker events
  */
 function setupTrafficMarkerEvents(marker, position, options) {
   marker.on("click", (e) => {
@@ -974,7 +974,7 @@ function setupTrafficMarkerEvents(marker, position, options) {
       options.onClick(e, marker, position);
     } else {
       showTrafficDetailModal();
-      // 如果标记携带报告数据，则渲染到模态框
+      // If marker carries report data, render to modal
       if (options.report) {
         renderTrafficReport(options.report);
       }
@@ -1032,7 +1032,7 @@ function mapReportTypeToLabel(type) {
 function normalizeTimestamp(input) {
   if (!input) return null;
   try {
-    // Firebase Timestamp 对象
+    // Firebase Timestamp object
     if (typeof input === "object") {
       if (typeof input.toDate === "function") {
         return input.toDate().getTime();
@@ -1043,11 +1043,11 @@ function normalizeTimestamp(input) {
         );
       }
     }
-    // 数字：可能是秒或毫秒
+    // Number: could be seconds or milliseconds
     if (typeof input === "number") {
       return input < 1e12 ? input * 1000 : input;
     }
-    // Date 或可解析字符串
+    // Date or parseable string
     const parsed =
       input instanceof Date ? input.getTime() : new Date(input).getTime();
     return Number.isNaN(parsed) ? null : parsed;
@@ -1073,7 +1073,7 @@ function formatTimeAgo(input) {
 }
 
 /**
- * 移除特定交通标记
+ * Remove specific traffic marker
  */
 function removeTrafficMarker(marker) {
   if (!map || !marker) return;

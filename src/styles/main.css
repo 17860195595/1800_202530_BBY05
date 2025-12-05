@@ -531,7 +531,7 @@ body {
 }
 
 /* ==============================================
-   Traffic Jam Alert Block - 醒目的交通拥堵展示
+   Traffic Jam Alert Block - Prominent traffic congestion display
    ============================================== */
 
 .traffic-jam-alert {
@@ -555,7 +555,7 @@ body {
   }
 }
 
-/* 根据拥堵程度改变颜色 */
+/* Change color based on congestion level */
 .traffic-jam-alert.traffic-jam-low {
   background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
   border-color: #4caf50;
@@ -773,7 +773,7 @@ body {
   overflow-x: hidden;
 }
 
-/* 美化滚动条 */
+/* Style scrollbar */
 .traffic-jam-content::-webkit-scrollbar {
   width: 8px;
 }

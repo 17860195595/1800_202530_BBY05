@@ -1,4 +1,4 @@
-// routingService.js - 路线规划相关封装（OpenRouteService）
+// routingService.js - Route planning related wrapper (OpenRouteService)
 
 export async function fetchDrivingRoute(apiKey, start, end) {
   const apiUrl = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}`;

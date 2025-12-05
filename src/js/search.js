@@ -36,7 +36,7 @@ async function handleSearch(query) {
   searchResults.innerHTML = '<p>Searching...</p>';
 
   try {
-    // 使用真实的地理编码API查询位置
+    // Use real geocoding API to query location
     const results = await searchRealLocations(query);
     searchResultsData = results;
     
@@ -66,15 +66,15 @@ async function searchRealLocations(query) {
       `viewbox=-123.3,49.2,-123.0,49.3&` +
       `addressdetails=1`;
     
-    // 检测环境：开发环境使用 Vite 代理，生产环境使用 CORS 代理
-    // 更严格的环境检测：检查端口号或完整 hostname
+    // Detect environment: use Vite proxy in development, CORS proxy in production
+    // Stricter environment detection: check port number or full hostname
     const isDev = window.location.hostname === 'localhost' || 
                   window.location.hostname === '127.0.0.1' ||
                   window.location.port === '5173' ||
                   window.location.port === '4173';
     
     if (isDev) {
-      // 开发环境：使用 Vite 代理
+      // Development: use Vite proxy
       const searchUrl = `/api/nominatim/search?` +
         `q=${encodeURIComponent(query)}&` +
         `format=json&` +
@@ -98,9 +98,9 @@ async function searchRealLocations(query) {
       const data = await response.json();
       return normalizeSearchResults(data, query);
     } else {
-      // 生产环境：直接使用 CORS 代理服务（Nominatim 不支持 CORS，跳过直接调用）
+      // Production: use CORS proxy service directly (Nominatim doesn't support CORS, skip direct call)
       const proxyServices = [
-        // 方案1: 使用 allorigins.win raw 模式（最快，返回原始 JSON）
+        // Option 1: use allorigins.win raw mode (fastest, returns raw JSON)
         {
           url: `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`,
           parseResponse: (data) => data,
@@ -108,7 +108,7 @@ async function searchRealLocations(query) {
             'Accept': 'application/json'
           }
         },
-        // 方案2: 使用 allorigins.win 标准模式（备用方案）
+        // Option 2: use allorigins.win standard mode (fallback)
         {
           url: `https://api.allorigins.win/get?url=${encodeURIComponent(nominatimUrl)}`,
           parseResponse: (data) => {
@@ -138,21 +138,21 @@ async function searchRealLocations(query) {
           
           let data = await response.json();
           
-          // 使用自定义解析函数
+          // Use custom parse function
           data = proxy.parseResponse(data);
           
-          // 验证数据格式
+          // Validate data format
           if (Array.isArray(data) && data.length > 0 && data[0].display_name) {
             return normalizeSearchResults(data, query);
           }
         } catch (error) {
           console.warn(`Proxy service failed: ${proxy.url}`, error);
           lastError = error;
-          continue; // 尝试下一个代理
+          continue; // Try next proxy
         }
       }
       
-      // 所有代理都失败了
+      // All proxies failed
       throw lastError || new Error('All proxy services failed');
     }
   } catch (error) {
@@ -161,7 +161,7 @@ async function searchRealLocations(query) {
   }
 }
 
-// 标准化搜索结果
+// Normalize search results
 function normalizeSearchResults(data, query) {
   return data.map((item, index) => ({
     name: item.display_name.split(',')[0] || query,
