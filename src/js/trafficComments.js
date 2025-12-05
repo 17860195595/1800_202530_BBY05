@@ -457,12 +457,12 @@ async function loadAddressForReport(report) {
  */
 async function reverseGeocode(lat, lng) {
     try {
-        // 检测环境：开发环境使用 Vite 代理，生产环境使用 CORS 代理
+        // Detect environment: use Vite proxy in development, CORS proxy in production
         const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`;
         
         if (isDev) {
-            // 开发环境：使用 Vite 代理
+            // Development: use Vite proxy
             const url = `/api/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`;
             const response = await fetch(url, {
                 headers: {
@@ -480,9 +480,9 @@ async function reverseGeocode(lat, lng) {
             }
             throw new Error('No address found');
         } else {
-            // 生产环境：直接使用 CORS 代理服务（Nominatim 不支持 CORS，跳过直接调用）
+            // Production: use CORS proxy service directly (Nominatim doesn't support CORS, skip direct call)
             const proxyServices = [
-                // 方案1: 使用 allorigins.win raw 模式（最快，返回原始 JSON）
+                // Option 1: use allorigins.win raw mode (fastest, returns raw JSON)
                 {
                     url: `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`,
                     parseResponse: (data) => data,
@@ -490,7 +490,7 @@ async function reverseGeocode(lat, lng) {
                         'Accept': 'application/json'
                     }
                 },
-                // 方案2: 使用 allorigins.win 标准模式（备用方案）
+                // Option 2: use allorigins.win standard mode (fallback)
                 {
                     url: `https://api.allorigins.win/get?url=${encodeURIComponent(nominatimUrl)}`,
                     parseResponse: (data) => {

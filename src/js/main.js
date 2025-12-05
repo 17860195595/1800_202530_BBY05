@@ -174,17 +174,17 @@ function handleSearch(query) {
     return;
   }
 
-  // Use Nominatim API for geocoding search (通过代理避免CORS)
-  // 检测环境：开发环境使用 Vite 代理，生产环境使用 CORS 代理
+  // Use Nominatim API for geocoding search (via proxy to avoid CORS)
+  // Detect environment: use Vite proxy in development, CORS proxy in production
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
   
   let url;
   if (isDev) {
-    // 开发环境：使用 Vite 代理
+    // Development: use Vite proxy
     url = `/api/nominatim/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
   } else {
-    // 生产环境：使用 allorigins.win raw 模式（更快，直接返回 JSON）
+    // Production: use allorigins.win raw mode (faster, returns JSON directly)
     url = `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`;
   }
 
@@ -195,7 +195,7 @@ function handleSearch(query) {
   })
     .then(response => response.json())
     .then(data => {
-      // raw 模式直接返回 JSON，无需解析
+      // Raw mode returns JSON directly, no parsing needed
       if (data && data.length > 0) {
         const result = data[0];
         const lat = parseFloat(result.lat);
@@ -408,7 +408,7 @@ function displayTrafficReports(reports) {
     
     // Add traffic marker
     addTrafficMarker(position, {
-      tooltip: '点击查看交通状况',
+      tooltip: 'Click to view traffic status',
       report: reportData
     });
   });
@@ -432,7 +432,7 @@ function addTrafficMarker(position, options = {}) {
   }
   
   const defaultOptions = {
-    tooltip: '查看交通状况',
+    tooltip: 'View traffic status',
     onClick: null,
     iconSize: [40, 40],
     ...options
@@ -505,7 +505,7 @@ function setupTrafficMarkerEvents(marker, position, options) {
       options.onClick(e, marker, position);
     } else {
       showTrafficDetailModal();
-      // 如果标记携带报告数据，则渲染到模态框
+      // If marker carries report data, render to modal
       if (options.report) {
         renderTrafficReport(options.report);
       }
@@ -545,16 +545,16 @@ function formatTimestamp(timestamp) {
     const diffMs = now - date;
     const diffMins = Math.floor(diffMs / 60000);
     
-    if (diffMins < 1) return '刚刚';
-    if (diffMins < 60) return `${diffMins}分钟前`;
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
     
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}小时前`;
+    if (diffHours < 24) return `${diffHours} h ago`;
     
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}天前`;
+    if (diffDays < 7) return `${diffDays} d ago`;
     
-    return date.toLocaleDateString('zh-CN');
+    return date.toLocaleDateString('en-US');
   } catch (error) {
     return '';
   }

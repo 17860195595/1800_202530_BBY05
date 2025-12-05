@@ -1,32 +1,32 @@
 /**
- * API Helper - 提供环境感知的 API 端点
- * 在开发环境使用 Vite 代理，在生产环境使用 Firebase Functions
+ * API Helper - Provides environment-aware API endpoints
+ * Uses Vite proxy in development, Firebase Functions in production
  */
 
 /**
- * 检测是否为开发环境
+ * Check if running in development environment
  */
 function isDevelopment() {
   return import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 }
 
 /**
- * 获取 Nominatim API 基础 URL
+ * Get Nominatim API base URL
  */
 export function getNominatimBaseUrl() {
   if (isDevelopment()) {
-    // 开发环境：使用 Vite 代理
+    // Development: use Vite proxy
     return '/api/nominatim';
   } else {
-    // 生产环境：使用 Firebase Functions
-    // 需要部署后获取实际的 functions URL
-    // 如果使用 Firebase Hosting rewrites，可以直接使用相对路径
+    // Production: use Firebase Functions
+    // Need to get actual functions URL after deployment
+    // If using Firebase Hosting rewrites, can use relative path directly
     return '/api/nominatim';
   }
 }
 
 /**
- * 构建 Nominatim 搜索 URL
+ * Build Nominatim search URL
  */
 export function buildNominatimSearchUrl(params) {
   const baseUrl = getNominatimBaseUrl();
@@ -44,7 +44,7 @@ export function buildNominatimSearchUrl(params) {
 }
 
 /**
- * 构建 Nominatim 反向地理编码 URL
+ * Build Nominatim reverse geocoding URL
  */
 export function buildNominatimReverseUrl(params) {
   const baseUrl = getNominatimBaseUrl();

@@ -58,7 +58,7 @@ onAuthReady((user) => {
             e.target.reset();
 
 
-            // 跳转到 main page
+            // Navigate to main page
             setTimeout(() => {
               window.location.href = getMainPath();
             }, 1000);
